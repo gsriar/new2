@@ -24,7 +24,8 @@ namespace TransactionUI
         {
             InputParameter inputParam = new InputParameter()
             {
-                InputExcelFilePath = @"C:\backup\TransactionUtilityTest\Book1.xlsx",
+                InputExcelFilePath = @"C:\backup\TransactionUtilityTest\Data.xlsx",
+                
                 ConfigExcelFilePath = @"C:\backup\TransactionUtilityTest\Mapping.xlsx",
                 OutputFileName = "Result.xlsx",
                 OuptputFolder = @"C:\backup\TransactionUtilityTest\Completed",
@@ -40,7 +41,9 @@ namespace TransactionUI
        
         private void WriteLog(string logText)
         {
-            txtResult.Text = logText+Environment.NewLine + txtResult.Text;
+            txtResult.Text = txtResult.Text + logText + Environment.NewLine;
+            txtResult.SelectionStart = txtResult.TextLength;
+            txtResult.ScrollToCaret();
         }
     }
 }

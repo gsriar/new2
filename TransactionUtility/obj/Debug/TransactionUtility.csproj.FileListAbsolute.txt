@@ -22,3 +22,4 @@ C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\bin\Debug\System.Data.SQLite.dll
 C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\obj\Debug\TransactionUtility.csproj.CopyComplete
 C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\obj\Debug\TransactionUtility.dll
 C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\obj\Debug\TransactionUtility.pdb
+C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\obj\Debug\TransactionUtility.csprojAssemblyReference.cache

@@ -34,9 +34,10 @@
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(491, 228);
+            this.btnTest.Location = new System.Drawing.Point(655, 281);
+            this.btnTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnTest.Name = "btnTest";
-            this.btnTest.Size = new System.Drawing.Size(106, 23);
+            this.btnTest.Size = new System.Drawing.Size(141, 28);
             this.btnTest.TabIndex = 0;
             this.btnTest.Text = "Test";
             this.btnTest.UseVisualStyleBackColor = true;
@@ -44,19 +45,28 @@
             // 
             // txtResult
             // 
-            this.txtResult.Location = new System.Drawing.Point(19, 12);
+            this.txtResult.BackColor = System.Drawing.Color.Beige;
+            this.txtResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtResult.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtResult.ForeColor = System.Drawing.Color.Black;
+            this.txtResult.HideSelection = false;
+            this.txtResult.Location = new System.Drawing.Point(25, 15);
+            this.txtResult.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtResult.Multiline = true;
             this.txtResult.Name = "txtResult";
-            this.txtResult.Size = new System.Drawing.Size(578, 210);
+            this.txtResult.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtResult.Size = new System.Drawing.Size(769, 258);
             this.txtResult.TabIndex = 1;
+            this.txtResult.WordWrap = false;
             // 
             // Test
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(619, 263);
+            this.ClientSize = new System.Drawing.Size(825, 324);
             this.Controls.Add(this.txtResult);
             this.Controls.Add(this.btnTest);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Test";
             this.Text = "Test";
             this.ResumeLayout(false);

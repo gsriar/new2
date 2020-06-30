@@ -7,6 +7,6 @@ namespace TransactionUtility.TransactionTool
     {
         void Dispose();
         List<string> GetAllSheet();
-        DataTable GetDataTable(string SheetName);
+        DataTable GetDataTable(string SheetName, int headerRow);
     }
 }

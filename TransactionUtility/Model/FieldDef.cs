@@ -7,18 +7,18 @@ namespace TransactionUtility.Model
 {
 	public class FieldDef
 	{
-		public string Name { get; set; }
+        public string DataObject { get; set; }
+        public string DataFieldName { get; set; }
+        public string Alias { get; set; }
+        public string DataType { get; set; }
+        public string IsNullable { get; set; }
+        public string IsCalculated { get; set; }
+        public string Formula { get; set; }
+        public string Remarks { get; set; }
 
-		public string Alias { get; set; }
-
-		public string TypeName { get; set; }
-
-		public bool Nullable { get; set; }
-
-		public bool IsCalculated { get; set; }
-
-		public string Expression { get; set; }
-
-		public DataFieldType DataFieldType { get; set; }
+		public DataFieldType DataFieldType()
+        {
+            return Model.DataFieldType.Numeric;
+        }
 	}
 }

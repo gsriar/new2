@@ -8,14 +8,15 @@ namespace TransactionUtility
 {
     static class Constants
     {
-        public static string SheetDataObject = "DataObject";
-        public static string SheetDataFiledDefinition = "DataFiledDefinition";
-        public static string SheetMearsureDefinition = "MearsureDefinition";
+        internal static readonly string SheetConstants ="Constants";
+        public static string SheetDataObjectName = "DataObject";
+        public static string SheetDataFiledDefinition = "DataFieldDefinition";
+        public static string SheetMeasureDefinition = "MeasureDefinition";
 
         public static string[] configSheets = {
-            SheetDataObject,
+            SheetDataObjectName,
             SheetDataFiledDefinition,
-            SheetMearsureDefinition
+            SheetMeasureDefinition
         };
 
         public static class ColumnFields
@@ -28,12 +29,11 @@ namespace TransactionUtility
             public static string Remarks = "Remarks";
 
             public static string[] DataObjectFieldList = {
-            DataObject,
-            Alias,
-            IsCalculated,
-            EvaluationQuery,
-            Remarks };
-            //DataObject	Alias	IsCalculated	Evaluation Query	Remarks
+                                                            DataObject,
+                                                            Alias,
+                                                            IsCalculated,
+                                                            EvaluationQuery,
+                                                            Remarks };
 
 
             public static string DataFieldName = "Data Field Name";

@@ -5,16 +5,25 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.Model
 {
-	public class DataObject
-	{
-		public string Name { get; set; }
+    public class DataObject
+    {
 
-		public string Alias { get; set; }
+        public DataObject(string dataObject, string alias, string isCalculated, string evaluationQuery)
+        {
+            this.DataObjectName = dataObject;
+            this.Alias = alias;
+            this.IsCalculated = IsCalculated;
+            this.EvaluationQuery = evaluationQuery;
+        }
 
-		public List<FieldDef> FieldDef { get; set; }
+        public string DataObjectName { get; private set; }
 
-		public bool IsCalculated { get; set; }
+		public string Alias { get; private set; } 
 
-		public string Query { get; set; }
-	}
+        public string IsCalculated { get; private set; }
+
+		public string EvaluationQuery { get; private set; }
+
+        public List<FieldDef> FieldDef { get; set; }
+    }
 }
