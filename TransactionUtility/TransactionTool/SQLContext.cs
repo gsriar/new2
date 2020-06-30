@@ -1,18 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Text;
 using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-	public class SQLContext : ILog
-	{
-		private Action<String> logDelegate;
+	public class SQLContext : ILog, IDisposable
+    {
+        private SQLiteConnection conn=null;
 
-		public SQLContext(Action<string> LogDelegate)
+        private Action<string> logDelegate=null;
+
+
+        public SQLContext(Action<string> LogDelegate)
         {
-            throw new NotImplementedException();
+            this.logDelegate = LogDelegate;
+            string cs = "Data Source=:memory:";
+
+            conn = new SQLiteConnection(cs);
+            conn.Open();
+        }
+
+        public void Dispose()
+        {
+            if(conn!=null)
+            {
+                conn.Close();
+                conn.Dispose();
+                conn = null;
+            }
         }
 
         public int ExecuteNonQuery(string query)
@@ -27,7 +45,8 @@ namespace TransactionUtility.TransactionTool
 
         public void WriteLog(string logtext)
         {
-            logDelegate(logtext);
+            if (this.logDelegate != null)
+                logDelegate(logtext);
         }
 	}
 }

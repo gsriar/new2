@@ -3,3 +3,8 @@
 ################################################################################
 
 /.vs/TransactionUtility/v16
+/.vs
+/packages
+/TransactionUI/bin/Debug
+/TransactionUI/obj
+/TransactionUtility/bin/Debug

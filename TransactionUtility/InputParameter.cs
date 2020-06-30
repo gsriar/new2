@@ -22,5 +22,7 @@ namespace TransactionUtility
 		public string OutputFileName { get; set; }
 
 		public string ErrorFolder { get; set; }
-	}
+
+        public string LogFolder { get; set; }
+    }
 }

@@ -13,6 +13,8 @@ namespace TransactionUI
 {
     public partial class Test : Form
     {
+        int count = 0;
+
         public Test()
         {
             InitializeComponent();
@@ -20,14 +22,25 @@ namespace TransactionUI
 
         private void btnTest_Click(object sender, EventArgs e)
         {
-            InputParameter ip = new InputParameter();
-            CalculationEngine engine = new CalculationEngine(ip, WriteLog);
-            engine.Evaluate();
-        }
+            InputParameter inputParam = new InputParameter()
+            {
+                InputExcelFilePath = @"C:\backup\TransactionUtilityTest\Book1.xlsx",
+                ConfigExcelFilePath = @"C:\backup\TransactionUtilityTest\Mapping.xlsx",
+                OutputFileName = "Result.xlsx",
+                OuptputFolder = @"C:\backup\TransactionUtilityTest\Completed",
+                ErrorFolder = @"C:\backup\TransactionUtilityTest\Error",
+                LogFolder= @"C:\backup\TransactionUtilityTest\Log"
+            };
 
+            using (CalculationEngine engine = new CalculationEngine(inputParam, WriteLog))
+            {
+                engine.Evaluate();
+            }
+        }
+       
         private void WriteLog(string logText)
         {
-            txtResult.Text = txtResult.Text + Environment.NewLine + logText;
+            txtResult.Text = logText+Environment.NewLine + txtResult.Text;
         }
     }
 }

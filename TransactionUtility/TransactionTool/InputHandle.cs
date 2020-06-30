@@ -1,23 +1,28 @@
+using ClosedXML.Excel;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Text;
 using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-    public class InputHandle : ILog
+    public class InputHandle : ExcelBase, ILog, IDisposable
     {
         private Action<String> logDelegate;
-        private ExcelConnection ExcelConnection;
-        public InputHandle(string excelFileName, Action<string> LogDelegate)
+
+        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath)
         {
-            throw new NotImplementedException();
+            this.logDelegate = LogDelegate;
         }
 
-        public DataSet InputDataSet { get; private set; }
-
-        public DataTable GetDataTable(DataObject dataObj)
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+        
+        public DataTable GetDataTable(DataObject dataObject)
         {
             throw new NotImplementedException();
         }
@@ -29,8 +34,12 @@ namespace TransactionUtility.TransactionTool
 
         public void WriteLog(string logtext)
         {
-            throw new NotImplementedException();
+            if (logDelegate != null)
+            {
+                logDelegate(logtext);
+            }
         }
+
 
 
     }
