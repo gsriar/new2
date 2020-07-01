@@ -3,66 +3,84 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
     public class ConfigHandle : ExcelBase, ILog, IDisposable
     {
-        private Action<String> logDelegate;
-        List<DataObject> dataObjectCollection;
-        List<MeasureDef> measureDefCollection;
-       
-        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath)
-        {
-            FileInfo fi = new FileInfo(excelFilePath);
+        List<DataObject> dataObjectCollection = new List<DataObject>();
+        List<MeasureDef> measureDefCollection = new List<MeasureDef>();
+        Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
 
-            if (!fi.Exists)
-                throw new Exception($"File does nor exists [{fi.Name}]");
-
-            if(fi.Extension.ToLower()!=".xlsx")
-                throw new Exception($"File [{fi.Name}] extension is not [{fi.Extension}]");
-
-            this.logDelegate = LogDelegate;
-        }
+        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate) { }
 
         public void Init()
         {
             LoadDefinition();
         }
 
+        public List<string> GetClientSheetNameList()
+        {
+            List<string> result = new List<string>();
+            dataObjectCollection.ForEach(d => result.Add(d.DataObjectName));
+            return result;
+        }
+
+        public void Validate()
+        {
+            WriteLog("...");
+            foreach (DataObject key in dataContextDictionary.Keys)
+            {
+                var ctx = dataContextDictionary[key];
+                ctx.Validate();
+            }
+        }
+
+        public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
+        {
+            WriteLog("...");
+            foreach (var key in objDataDictionary.Keys)
+            {
+                WriteLog($"Set DataContext :[{key}]");
+                var table = objDataDictionary[key];
+
+                var obj = dataObjectCollection.FirstOrDefault(d => string.Equals(d.DataObjectName, key, StringComparison.OrdinalIgnoreCase));
+
+                DataObjectContext ctx = new DataObjectContext(obj, table, WriteLog);
+
+                dataContextDictionary[obj] = ctx;
+            }
+        }
+
+
         private void LoadDefinition()
         {
-            WriteLog($"Loading [{Constants.SheetConstants}]");
-            var sheetConstants = this.GetDataTable(Constants.SheetConstants);
+            WriteLog($"...");
+            ReadWorkbookAndCleanup();
+            WriteLog($"...");
+            LoadDataObject(this.GetDataTable(Constants.SheetDataObjectName));
+            WriteLog($"...");
+            LoadDataFields(this.GetDataTable(Constants.SheetDataFiledDefinition), dataObjectCollection);
+            WriteLog($"...");
+            LoadMeasureDefinition(this.GetDataTable(Constants.SheetMeasureDefinition));
+        }
 
-            WriteLog($"Loading [{Constants.SheetDataFiledDefinition}]");
-            var sheetDataObject = this.GetDataTable(Constants.SheetDataObjectName);
+        void ReadWorkbookAndCleanup()
+        {
+            var deleteQuery1 = $"{Constants.ColumnFields.DataObject}='' or {Constants.ColumnFields.DataObject} is null";
 
-            WriteLog($"Loading [{Constants.SheetDataFiledDefinition}]");
-            var sheetDataFields = this.GetDataTable(Constants.SheetDataFiledDefinition);
+            var deleteQuery2 = $"{Constants.ColumnFields.SourceMeasure}='' or {Constants.ColumnFields.SourceMeasure} is null";
 
-            WriteLog($"Loading config [{Constants.SheetMeasureDefinition}]");
-            var sheetMeasures = this.GetDataTable(Constants.SheetMeasureDefinition);
+            CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetDataObjectName), deleteQuery1);
 
-            var delQueryDataObject = $"{Constants.ColumnFields.DataObject}='' or {Constants.ColumnFields.DataObject} is null";
-            var delQuerySourceMeasure = $"{Constants.ColumnFields.SourceMeasure}='' or {Constants.ColumnFields.SourceMeasure} is null";
+            CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetDataFiledDefinition), deleteQuery1);
 
-            CommonFunctions.Delete(sheetDataObject, delQueryDataObject);
-            WriteLog($"DataObject definition Count : {sheetDataObject.Rows.Count}");
-            
-            CommonFunctions.Delete(sheetDataFields, delQueryDataObject);
-            WriteLog($"Data Field Definition Count : {sheetDataObject.Rows.Count}");
-
-            CommonFunctions.Delete(sheetMeasures, delQuerySourceMeasure);
-            WriteLog($"Source Measure Definition Count : {sheetDataObject.Rows.Count}");
-
-            LoadDataObject(sheetDataObject);
-
-            LoadDataFields(sheetDataFields, dataObjectCollection);
-
-            LoadMeasureDefinition(sheetMeasures);
-
+            CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetMeasureDefinition), deleteQuery2);
+            DataTable dt = this.GetDataTable(Constants.SheetDataFiledDefinition);
+            string txt =dt.ToCSV();
+            WriteLog(Environment.NewLine + txt);
         }
 
         void LoadDataObject(DataTable sheetDataObject)
@@ -71,7 +89,7 @@ namespace TransactionUtility.TransactionTool
 
             foreach (DataRow row in sheetDataObject.Rows)
             {
-                WriteLog($"Loading Dataobject [{row["dataObject"] as string}.{row["alias"] as string}]");
+                WriteLog($"Config Dataobject [{row["dataObject"] as string} | {row["alias"] as string}]");
                 dataObjectCollection.Add(new DataObject(
                     row["dataObject"] as string,
                     row["alias"] as string,
@@ -83,7 +101,6 @@ namespace TransactionUtility.TransactionTool
 
         void LoadDataFields(DataTable sheetDataFields, List<DataObject> dataObjects)
         {
-
             foreach (var dataObject in dataObjects)
             {
                 var filter = $"{Constants.SheetDataObjectName}='{dataObject.Alias}'";
@@ -91,6 +108,8 @@ namespace TransactionUtility.TransactionTool
                 List<FieldDef> FieldDefCollection = new List<FieldDef>();
 
                 DataRow[] rows = sheetDataFields.Select(filter);
+
+                WriteLog($"...");
                 WriteLog($"Loading Data Fields for  [{dataObject.Alias}]");
 
                 if (rows.Length == 0)
@@ -104,11 +123,11 @@ namespace TransactionUtility.TransactionTool
                     fld.Alias = row["Alias"] as string;
                     fld.DataType = row["DataType"] as string;
                     fld.IsNullable = row["IsNullable"] as string;
-                    fld.IsCalculated = row["IsCalculated"] as string;
+                    fld.SetIsCalculated = row["IsCalculated"] as string;
                     fld.Formula = row["Formula"] as string;
                     fld.Remarks = row["Remarks"] as string;
 
-                    WriteLog($"Fields  [{fld.DataObject}.{fld.DataFieldName}]");
+                    WriteLog($"Config Field:  [{fld.DataObject} | {fld.DataFieldName}]");
 
                     FieldDefCollection.Add(fld);
                 }
@@ -126,7 +145,7 @@ namespace TransactionUtility.TransactionTool
             foreach (DataRow row in sheetMeasures.Rows)
             {
                 MeasureDef m = new MeasureDef();
-                
+
                 m.SourceMeasure = row["SourceMeasure"] as string;
                 m.PersonOrOrg = row["PersonOrOrg"] as string;
                 m.DataSourceIdentifier = row["DataSourceIdentifier"] as string;
@@ -139,26 +158,17 @@ namespace TransactionUtility.TransactionTool
                 m.FilterClause = row["FilterClause"] as string;
                 m.Comments = row["Comments"] as string;
 
-                WriteLog($"Loading Measure Definition  [{m.SourceMeasure}]");
+                WriteLog($"Config Measure Definition  [{m.SourceDataObject}] | [{m.SourceMeasure}]");
 
                 measureDefCollection.Add(m);
             }
 
         }
 
-
-
         public string GetConstant(string Name)
         {
-            throw new NotImplementedException();
-        }
-
-        public void WriteLog(string logtext)
-        {
-            if (logDelegate != null)
-            {
-                logDelegate(logtext);
-            }
+            var sheetConstants = this.GetDataTable(Constants.SheetConstants);
+            return null;
         }
 
         public DataObjectContext GetDataObjectContext(DataObject dataObj)
@@ -168,17 +178,23 @@ namespace TransactionUtility.TransactionTool
 
         public DataObject GetDataObject(string Name)
         {
-            throw new NotImplementedException();
+            return dataObjectCollection.FirstOrDefault(d => d.DataObjectName == Name);
         }
 
-        public List<MeasureDef> GetMeasureDefCollection()
+        public List<MeasureDef> GetMeasureDefCollection
         {
-            throw new NotImplementedException();
+            get
+            {
+                return measureDefCollection;
+            }
         }
 
-        public List<DataObject> GetDataObjectCollection()
+        public List<DataObject> GetDataObjectCollection
         {
-            throw new NotImplementedException();
+            get
+            {
+                return dataObjectCollection;
+            }
         }
 
         public override void Dispose()

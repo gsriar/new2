@@ -19,6 +19,16 @@ namespace TransactionUtility
             SheetMeasureDefinition
         };
 
+
+        public static class DataTypes
+        {
+            public const string Text = "TEXT";
+            public const string Numeric = "NUMERIC";
+            public const string Date = "DATE";
+            public const string Integer = "INT";
+            public const string Int = "INTEGER";
+        }
+
         public static class ColumnFields
         {
             public static string DataObject = "DataObject";

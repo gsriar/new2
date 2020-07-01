@@ -30,9 +30,15 @@ namespace TransactionUtility
 
                 configHandle = new ConfigHandle(inputParam.ConfigExcelFilePath, logWriter.Write);
 
+                configHandle.Init();
+
                 inputHandle = new InputHandle(inputParam.InputExcelFilePath, logWriter.Write);
 
-                configHandle.Init();
+                var rawdata = inputHandle.GetData(configHandle.GetClientSheetNameList());
+
+
+                configHandle.SetDataContext(rawdata);
+                configHandle.Validate();
             }
             catch (Exception ex)
             {

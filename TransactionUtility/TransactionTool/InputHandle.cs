@@ -10,37 +10,26 @@ namespace TransactionUtility.TransactionTool
 {
     public class InputHandle : ExcelBase, ILog, IDisposable
     {
-        private Action<String> logDelegate;
-
-        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath)
+        ConfigHandle configHandle = null;
+        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate)
         {
-            this.logDelegate = LogDelegate;
+        }
+
+        internal Dictionary<string, DataTable> GetData(List<string> sheets)
+        {
+            Dictionary<string, DataTable> pairs = new Dictionary<string, DataTable>();
+            WriteLog($"...");
+            foreach (var obj in sheets)
+            {
+                pairs.Add(obj, this.GetDataTable(obj));
+            }
+            return pairs;
         }
 
         public override void Dispose()
         {
             base.Dispose();
         }
-        
-        public DataTable GetDataTable(DataObject dataObject)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Validate(DataObject dataObj)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteLog(string logtext)
-        {
-            if (logDelegate != null)
-            {
-                logDelegate(logtext);
-            }
-        }
-
-
 
     }
 }

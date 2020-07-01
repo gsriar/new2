@@ -24,9 +24,9 @@ namespace TransactionUI
         {
             InputParameter inputParam = new InputParameter()
             {
-                InputExcelFilePath = @"C:\backup\TransactionUtilityTest\Data.xlsx",
+                InputExcelFilePath = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Data.xlsx",
                 
-                ConfigExcelFilePath = @"C:\backup\TransactionUtilityTest\Mapping.xlsx",
+                ConfigExcelFilePath = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Mapping.xlsx",
                 OutputFileName = "Result.xlsx",
                 OuptputFolder = @"C:\backup\TransactionUtilityTest\Completed",
                 ErrorFolder = @"C:\backup\TransactionUtilityTest\Error",

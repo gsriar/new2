@@ -16,11 +16,11 @@ namespace TransactionUtility.TransactionTool
 
         public SQLContext(Action<string> LogDelegate)
         {
-            this.logDelegate = LogDelegate;
-            string cs = "Data Source=:memory:";
+            //this.logDelegate = LogDelegate;
+            //string cs = "Data Source=:memory:";
 
-            conn = new SQLiteConnection(cs);
-            conn.Open();
+            //conn = new SQLiteConnection(cs);
+            //conn.Open();
         }
 
         public void Dispose()

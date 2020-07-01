@@ -6,7 +6,7 @@ namespace TransactionUtility.TransactionTool
     public interface IExcelConnection
     {
         void Dispose();
-        List<string> GetAllSheet();
+        List<string> GetAllSheetNameList();
         DataTable GetDataTable(string SheetName, int headerRow);
     }
 }

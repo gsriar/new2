@@ -12,21 +12,33 @@ namespace TransactionUtility.TransactionTool
     {
         protected XLWorkbook workBook;
         private List<string> allSheets;
-        Dictionary<string, DataTable> tableColl = new Dictionary<string, DataTable>();
-        FileInfo fi = null;
+        Dictionary<string, DataTable> tableCollection = new Dictionary<string, DataTable>();
+        FileInfo excelFile = null;
+        Action<string> logDelegate;
 
-
-        public ExcelBase(string excelFilePath)
+        public ExcelBase(string excelFilePath,Action<string> LogDelegate)
         {
-            fi = new FileInfo(excelFilePath);
-            workBook = new XLWorkbook(fi.FullName);
+            this.logDelegate = LogDelegate;
+            WriteLog($"...");
+            WriteLog($"Loading File : {excelFilePath}");
+           
+            FileInfo fi = new FileInfo(excelFilePath);
+
+            if (!fi.Exists)
+                throw new Exception($"File does not exists [{fi.Name}]");
+
+            if (fi.Extension.ToLower() != ".xlsx")
+                throw new Exception($"File is not (.xlsx) extension");
+
+            excelFile = new FileInfo(excelFilePath);
+            workBook = new XLWorkbook(excelFile.FullName);
         }
         public virtual void Dispose()
         {
             workBook.Dispose();
         }
 
-        public List<string> GetAllSheet()
+        public List<string> GetAllSheetNameList()
         {
             if (allSheets == null)
             {
@@ -42,17 +54,21 @@ namespace TransactionUtility.TransactionTool
             return allSheets;
         }
 
-        public DataTable GetDataTable(string sheetName, int headerRow=1)
+        public DataTable GetDataTable(string sheetName, int headerRow = 1)
         {
-            var sheets = GetAllSheet();
+            if (tableCollection.ContainsKey(sheetName))
+                return tableCollection[sheetName];
 
-            if(!sheets.Contains(sheetName))
+            var sheets = GetAllSheetNameList();
+
+            WriteLog($"Read Worksheet [{sheetName}]");
+           
+
+            if (!sheets.Contains(sheetName))
             {
-                throw new Exception($"Workbook [{fi.Name}] does not contain sheet [{sheetName}]");
+                throw new Exception($"Workbook [{excelFile.Name}] does not contain sheet [{sheetName}]");
             }
 
-            if (tableColl.ContainsKey(sheetName))
-                return tableColl[sheetName];
 
             if (headerRow <= 0)
                 headerRow = 1;
@@ -85,20 +101,32 @@ namespace TransactionUtility.TransactionTool
                 }
                 else
                 {
-                    //Add rows to DataTable.
-                    dt.Rows.Add();
-                    int i = 0;
-
-                    //foreach (IXLCell cell in row.Cells(row.FirstCellUsed().Address.ColumnNumber, row.LastCellUsed().Address.ColumnNumber))
-                    foreach (IXLCell cell in row.Cells())
+                    if (!row.IsEmpty())
                     {
-                        dt.Rows[dt.Rows.Count - 1][i] = cell.Value??"".ToString();
-                        i++;
+                        //Add rows to DataTable.
+                        dt.Rows.Add();
+                        int i = 0;
+
+                        foreach (IXLCell cell in row.Cells(row.FirstCellUsed().Address.ColumnNumber, row.LastCellUsed().Address.ColumnNumber))
+                        //foreach (IXLCell cell in row.Cells())
+                        {
+                            dt.Rows[dt.Rows.Count - 1][i] = cell.Value ?? "".ToString();
+                            i++;
+                        }
                     }
                 }
             }
-            tableColl[sheetName] = dt;
+           
+            tableCollection[sheetName] = dt;
             return dt;
+        }
+
+        public void WriteLog(string logtext)
+        {
+            if (logDelegate != null)
+            {
+                logDelegate(logtext);
+            }
         }
     }
 }

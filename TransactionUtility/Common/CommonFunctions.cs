@@ -9,7 +9,7 @@ namespace TransactionUtility
 {
     static class CommonFunctions
     {
-        public static DataTable Delete(this DataTable table, string filter)
+        public static DataTable DeleteTableRows(this DataTable table, string filter)
         {
             table.Select(filter).Delete();
             table.AcceptChanges();
@@ -19,6 +19,72 @@ namespace TransactionUtility
         {
             foreach (var row in rows)
                 row.Delete();
+        }
+
+        public static string ToCSV(this DataTable table)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (DataColumn c in table.Columns)
+            {
+                sb.Append(c.ColumnName);
+                sb.Append('\t');
+            }
+
+            sb.AppendLine();
+
+            foreach (DataRow r in table.Rows)
+            {
+                sb.AppendLine(string.Join('\t'.ToString(), r.ItemArray));
+            }
+
+            return sb.ToString();
+        }
+
+        public static object TypeDefaultValue(string typ)
+        {
+            object result;
+            switch (typ.ToUpper().Trim())
+            {
+                case Constants.DataTypes.Date:
+                    result = DateTime.MinValue;
+                    break;
+
+                case Constants.DataTypes.Numeric:
+                case Constants.DataTypes.Int:
+                case Constants.DataTypes.Integer:
+                    result = 0;
+                    break;
+                default:
+                    result = "";
+                    break;
+
+            }
+
+            return result;
+        }
+
+        public static Type GetType(string typ)
+        {
+            Type result = typeof(string);
+
+            switch (typ.ToUpper().Trim())
+            {
+                case Constants.DataTypes.Date:
+                    result = typeof(DateTime);
+                    break;
+
+                case Constants.DataTypes.Numeric:
+                    result = typeof(decimal);
+                    break;
+
+                case Constants.DataTypes.Int:
+                case Constants.DataTypes.Integer:
+                    result = typeof(Int32);
+                    break;
+
+            }
+
+            return result;
         }
     }
 }

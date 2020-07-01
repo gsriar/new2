@@ -82,8 +82,10 @@
     <Compile Include="CalculationEngine.cs" />
     <Compile Include="TransactionTool\ConfigHandle.cs" />
     <Compile Include="TransactionTool\DataObjectContext.cs" />
+    <Compile Include="TransactionTool\PersistedDataObject.cs" />
     <Compile Include="TransactionTool\ExcelBase.cs" />
     <Compile Include="TransactionTool\ExecutionParameterContext.cs" />
+    <Compile Include="TransactionTool\IPersistDataObject.cs" />
     <Compile Include="TransactionTool\IExcelConnection.cs" />
     <Compile Include="TransactionTool\ILog.cs" />
     <Compile Include="TransactionTool\InputHandle.cs" />
@@ -94,7 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Excell\Mapping.xlsx" />
+    <None Include="Excel\Data.xlsx" />
+    <None Include="Excel\Mapping.xlsx" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
