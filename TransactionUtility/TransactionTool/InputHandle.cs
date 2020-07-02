@@ -11,7 +11,7 @@ namespace TransactionUtility.TransactionTool
     public class InputHandle : ExcelBase, ILog, IDisposable
     {
         ConfigHandle configHandle = null;
-        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate)
+        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate,"Data")
         {
         }
 

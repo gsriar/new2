@@ -14,9 +14,9 @@ namespace TransactionUtility.TransactionTool
         List<MeasureDef> measureDefCollection = new List<MeasureDef>();
         Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
 
-        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate) { }
+        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate,"Config") { }
 
-        public void Init()
+        public void Initilize()
         {
             LoadDefinition();
         }
@@ -54,7 +54,6 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
-
         private void LoadDefinition()
         {
             WriteLog($"...");
@@ -69,6 +68,8 @@ namespace TransactionUtility.TransactionTool
 
         void ReadWorkbookAndCleanup()
         {
+            var sheetConstants = this.GetDataTable(Constants.SheetConstants);
+
             var deleteQuery1 = $"{Constants.ColumnFields.DataObject}='' or {Constants.ColumnFields.DataObject} is null";
 
             var deleteQuery2 = $"{Constants.ColumnFields.SourceMeasure}='' or {Constants.ColumnFields.SourceMeasure} is null";
@@ -78,9 +79,10 @@ namespace TransactionUtility.TransactionTool
             CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetDataFiledDefinition), deleteQuery1);
 
             CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetMeasureDefinition), deleteQuery2);
+
             DataTable dt = this.GetDataTable(Constants.SheetDataFiledDefinition);
-            string txt =dt.ToCSV();
-            WriteLog(Environment.NewLine + txt);
+            
+           //riteLog(Environment.NewLine + dt.ToCSV());
         }
 
         void LoadDataObject(DataTable sheetDataObject)
@@ -89,12 +91,12 @@ namespace TransactionUtility.TransactionTool
 
             foreach (DataRow row in sheetDataObject.Rows)
             {
-                WriteLog($"Config Dataobject [{row["dataObject"] as string} | {row["alias"] as string}]");
+                WriteLog($" Loading DataObject Configuration [{row[Constants.ColumnFields.DataObject] as string}] alias [{row[Constants.ColumnFields.Alias] as string}]");
                 dataObjectCollection.Add(new DataObject(
-                    row["dataObject"] as string,
-                    row["alias"] as string,
-                    row["isCalculated"] as string,
-                    row["evaluationQuery"] as string));
+                    row[Constants.ColumnFields.DataObject] as string,
+                    row[Constants.ColumnFields.Alias] as string,
+                    row[Constants.ColumnFields.IsComputed] as string,
+                    row[Constants.ColumnFields.ComputeQuery] as string));
             }
 
         }
@@ -110,24 +112,24 @@ namespace TransactionUtility.TransactionTool
                 DataRow[] rows = sheetDataFields.Select(filter);
 
                 WriteLog($"...");
-                WriteLog($"Loading Data Fields for  [{dataObject.Alias}]");
+                WriteLog($"Loading Data Fields of DataObject [{dataObject.DataObjectName}] alias [{dataObject.Alias}]");
 
                 if (rows.Length == 0)
                     throw new Exception($"No Field defined for Data Object [{dataObject.Alias}]");
-
+                int rowCounter = 1;
                 foreach (DataRow row in rows)
                 {
                     FieldDef fld = new FieldDef();
-                    fld.DataObject = row["DataObject"] as string;
-                    fld.DataFieldName = row["DataFieldName"] as string;
-                    fld.Alias = row["Alias"] as string;
-                    fld.DataType = row["DataType"] as string;
-                    fld.IsNullable = row["IsNullable"] as string;
-                    fld.SetIsCalculated = row["IsCalculated"] as string;
-                    fld.Formula = row["Formula"] as string;
-                    fld.Remarks = row["Remarks"] as string;
+                    fld.DataObject = row[Constants.ColumnFields.DataObject] as string;
+                    fld.DataFieldName = row[Constants.ColumnFields.DataFieldName] as string;
+                    fld.Alias = row[Constants.ColumnFields.Alias] as string;
+                    fld.DataType = row[Constants.ColumnFields.DataType] as string;
+                    fld.IsNullable = row[Constants.ColumnFields.IsNullable] as string;
+                    fld.SetIsCalculated = row[Constants.ColumnFields.IsComputed] as string;
+                    fld.Formula = row[Constants.ColumnFields.ComputeFormula] as string;
+                    fld.Remarks = row[Constants.ColumnFields.Remarks] as string;
 
-                    WriteLog($"Config Field:  [{fld.DataObject} | {fld.DataFieldName}]");
+                    WriteLog($" Field #{rowCounter++}:  [{fld.DataFieldName}] alias [{fld.Alias}]");
 
                     FieldDefCollection.Add(fld);
                 }
@@ -146,17 +148,17 @@ namespace TransactionUtility.TransactionTool
             {
                 MeasureDef m = new MeasureDef();
 
-                m.SourceMeasure = row["SourceMeasure"] as string;
-                m.PersonOrOrg = row["PersonOrOrg"] as string;
-                m.DataSourceIdentifier = row["DataSourceIdentifier"] as string;
-                m.Periodicity = row["Periodicity"] as string;
-                m.SourceDataObject = row["SourceDataObject"] as string;
-                m.SourceMeasureMappingField = row["SourceMeasureMappingField"] as string;
-                m.SourceDateMappingField = row["SourceDateMappingField"] as string;
-                m.SourceEmployeeMappingField = row["SourceEmployeeMappingField"] as string;
-                m.SourceOrgMappingField = row["SourceOrgMappingField"] as string;
-                m.FilterClause = row["FilterClause"] as string;
-                m.Comments = row["Comments"] as string;
+                m.SourceMeasure = row[Constants.ColumnFields.SourceMeasure] as string;
+                m.PersonOrOrg = row[Constants.ColumnFields.PersonOrOrg] as string;
+                m.DataSourceIdentifier = row[Constants.ColumnFields.DataSourceIdentifier] as string;
+                m.Periodicity = row[Constants.ColumnFields.Periodicity] as string;
+                m.SourceDataObject = row[Constants.ColumnFields.SourceDataObject] as string;
+                m.SourceMeasureMappingField = row[Constants.ColumnFields.SourceMeasureMappingField] as string;
+                m.SourceDateMappingField = row[Constants.ColumnFields.SourceDateMappingField] as string;
+                m.SourceEmployeeMappingField = row[Constants.ColumnFields.SourceEmployeeMappingField] as string;
+                m.SourceOrgMappingField = row[Constants.ColumnFields.SourceOrgMappingField] as string;
+                m.FilterClause = row[Constants.ColumnFields.FilterClause] as string;
+                m.Comments = row[Constants.ColumnFields.Comments] as string;
 
                 WriteLog($"Config Measure Definition  [{m.SourceDataObject}] | [{m.SourceMeasure}]");
 
@@ -167,13 +169,12 @@ namespace TransactionUtility.TransactionTool
 
         public string GetConstant(string Name)
         {
-            var sheetConstants = this.GetDataTable(Constants.SheetConstants);
             return null;
         }
 
         public DataObjectContext GetDataObjectContext(DataObject dataObj)
         {
-            throw new NotImplementedException();
+            return dataContextDictionary[dataObj];
         }
 
         public DataObject GetDataObject(string Name)
@@ -186,14 +187,6 @@ namespace TransactionUtility.TransactionTool
             get
             {
                 return measureDefCollection;
-            }
-        }
-
-        public List<DataObject> GetDataObjectCollection
-        {
-            get
-            {
-                return dataObjectCollection;
             }
         }
 

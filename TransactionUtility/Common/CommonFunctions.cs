@@ -23,6 +23,7 @@ namespace TransactionUtility
 
         public static string ToCSV(this DataTable table)
         {
+           
             StringBuilder sb = new StringBuilder();
             foreach (DataColumn c in table.Columns)
             {
@@ -84,6 +85,35 @@ namespace TransactionUtility
 
             }
 
+            return result;
+        }
+
+        public static object ConvertObjType(object o, string typeText, Type _type)
+        {
+            object result = o;
+
+            if (result.GetType() == _type)
+            {
+                return result;
+            }
+            else
+            {
+                switch (typeText)
+                {
+                    case Constants.DataTypes.Date:
+                        result = Convert.ToDateTime(o);
+                        break;
+
+                    case Constants.DataTypes.Numeric:
+                        result = Convert.ToDecimal(o);
+                        break;
+
+                    case Constants.DataTypes.Int:
+                    case Constants.DataTypes.Integer:
+                        result = Convert.ToInt32(o);
+                        break;
+                }
+            }
             return result;
         }
     }

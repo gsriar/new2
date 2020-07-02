@@ -13,32 +13,39 @@ namespace TransactionUtility
         InputHandle inputHandle;
         LogWriter logWriter;
         SQLContext context;
-        InputParameter inputParam;
+        InputParameter inputParameter;
+        string prefix;
 
-        public CalculationEngine(InputParameter inputParam, Action<string> logDelegate)
+        public CalculationEngine(InputParameter inputParameter, Action<string> logDelegate)
         {
-            this.inputParam = inputParam;
-            logWriter = new LogWriter(inputParam.LogFolder, "log.txt");
+            this.inputParameter = inputParameter;
+            prefix = DateTime.Now.ToString("yyyyMMdd HHmmssff");
+            var fileFullName = Path.Combine(this.inputParameter.LogFolder, prefix + "log.txt");
+            logWriter = new LogWriter(fileFullName);
             logWriter.Add(logDelegate);
         }
-
+        
         public void Evaluate()
         {
             try
             {
                 context = new SQLContext(logWriter.Write);
 
-                configHandle = new ConfigHandle(inputParam.ConfigExcelFilePath, logWriter.Write);
+                configHandle = new ConfigHandle(inputParameter.ConfigExcelFilePath, logWriter.Write);
 
-                configHandle.Init();
+                configHandle.Initilize();
 
-                inputHandle = new InputHandle(inputParam.InputExcelFilePath, logWriter.Write);
+                inputHandle = new InputHandle(inputParameter.InputExcelFilePath, logWriter.Write);
 
                 var rawdata = inputHandle.GetData(configHandle.GetClientSheetNameList());
 
-
                 configHandle.SetDataContext(rawdata);
+
                 configHandle.Validate();
+
+
+                var meaureDef = configHandle.GetMeasureDefCollection;
+
             }
             catch (Exception ex)
             {
@@ -46,6 +53,10 @@ namespace TransactionUtility
             }
         }
 
+        private void MeasureEvaluator(List<MeasureDef> MeasureDefCollection, Action<string> textWriter, Action<string> logwriter)
+        {
+        }
+        
         public void Dispose()
         {
             if (configHandle != null)

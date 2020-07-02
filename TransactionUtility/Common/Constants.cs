@@ -33,23 +33,24 @@ namespace TransactionUtility
         {
             public static string DataObject = "DataObject";
             public static string Alias = "Alias";
-            public static string EvaluationQuery = "Evaluation Query";
-            public static string IsCalculated = "IsCalculated";
+            public static string ComputeQuery = "ComputeQuery";
+            public static string IsComputed = "IsComputed";
+            /*IsComputed	ComputeFormula IsComputed	ComputeQuery*/
 
             public static string Remarks = "Remarks";
 
             public static string[] DataObjectFieldList = {
                                                             DataObject,
                                                             Alias,
-                                                            IsCalculated,
-                                                            EvaluationQuery,
+                                                            IsComputed,
+                                                            ComputeQuery,
                                                             Remarks };
 
 
-            public static string DataFieldName = "Data Field Name";
-            public static string DataType = "Data Type";
+            public static string DataFieldName = "DataFieldName";
+            public static string DataType = "DataType";
             public static string IsNullable = "IsNullable";
-            public static string Formula = "Formula";
+            public static string ComputeFormula = "ComputeFormula";
 
             public static string[] DataFieldList = {
             DataObject,
@@ -57,8 +58,8 @@ namespace TransactionUtility
             Alias,
             DataType,
             IsNullable,
-            IsCalculated,
-            Formula,
+            IsComputed,
+            ComputeFormula,
             Remarks};
 
 

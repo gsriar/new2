@@ -13,6 +13,7 @@ namespace TransactionUtility.TransactionTool
         private DataTable rawDataTable;
         private DataTable newDataTable;
         private DataObject dataObject;
+        private bool IsCalculatedFiledEvaluated;
 
         public DataObjectContext(DataObject dataObject, DataTable rawDataTable, Action<string> LogDelegate)
         {
@@ -41,22 +42,35 @@ namespace TransactionUtility.TransactionTool
                     if (hasField == null)
                         throw new Exception($"Data Sheet [{dataObject.DataObjectName}] does not contain column [{fl.DataFieldName}]");
                     else
-                        WriteLog($" contains column [{fl.DataFieldName}]");
+                        WriteLog($" >[{fl.DataFieldName}]");
                 }
             }
 
             CreateDataTable();
-            WriteLog($"Validating Row Data");
+            WriteLog($"Load and Validate Row Level Data");
             LoadNewDataTable();
+            EvaluatedComputedColumn();
 
-            var x = newDataTable.ToCSV();
 
-            WriteLog(Environment.NewLine + x);
+           // WriteLog(Environment.NewLine + newDataTable.ToCSV());
 
 
             WriteLog($"Validating Successfull");
 
             return true;
+        }
+
+        void CreateDataTable()
+        {
+            newDataTable = new DataTable();
+
+            foreach (FieldDef fl in dataObject.FieldDef)
+            {
+                if (!fl.IsCalculated)
+                {
+                    newDataTable.Columns.Add(fl.Alias, fl.Type);
+                }
+            }
         }
 
         void LoadNewDataTable()
@@ -72,19 +86,19 @@ namespace TransactionUtility.TransactionTool
                 {
                     if (fl.IsCalculated)
                     {
-                        objArray.Add(fl.TypeDefault);
+                        // objArray.Add(fl.TypeDefault);
                     }
                     else
                     {
                         object o = row[fl.DataFieldName];
                         try
                         {
-                            objArray.Add(ConvertObjType(o, fl.DataType, fl.Type));
+                            objArray.Add(CommonFunctions.ConvertObjType(o, fl.DataType, fl.Type));
                         }
                         catch (Exception ex)
                         {
                             WriteLog(ex.Message);
-                            throw new Exception($"Unbale to convert [{fl.DataFieldName}] value [{o}] to [{fl.DataType.ToUpper()}] at row #[{rowNum}] in [{dataObject.DataObjectName}]");
+                            throw new Exception($"Unbale to convert [{o}] to [{fl.DataType.ToUpper()}] at row #[{rowNum}] in [{dataObject.DataObjectName}]");
                         }
                     }
                 }
@@ -92,56 +106,19 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
-        object ConvertObjType(object o, string typeText, Type _type)
+        void EvaluatedComputedColumn()
         {
-            object result = o;
-
-            if (result.GetType() == _type)
+            if (!IsCalculatedFiledEvaluated)
             {
-                return result;
-            }
-            else
-            {
-                switch (typeText)
+                foreach (FieldDef fl in dataObject.FieldDef)
                 {
-                    case Constants.DataTypes.Date:
-                        result = Convert.ToDateTime(o);
-                        break;
-
-                    case Constants.DataTypes.Numeric:
-                        result = Convert.ToDecimal(o);
-                        break;
-
-                    case Constants.DataTypes.Int:
-                    case Constants.DataTypes.Integer:
-                        result = Convert.ToInt32(o);
-                        break;
+                    if (fl.IsCalculated)
+                    {
+                        newDataTable.Columns.Add(fl.Alias, fl.Type, fl.Formula);
+                    }
                 }
+                IsCalculatedFiledEvaluated = true;
             }
-            return result;
-        }
-
-        void CreateDataTable()
-        {
-            newDataTable = new DataTable();
-
-            foreach (FieldDef f in dataObject.FieldDef)
-            {
-                newDataTable.Columns.Add(f.Alias, f.Type);
-            }
-        }
-
-
-        public void EvaluateMeasure()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsCalculatedFiledEvaluated { get; private set; }
-
-        public void EvaluateCalculatedFileds()
-        {
-            throw new NotImplementedException();
         }
 
         public bool IsDataObjectClaculationDone { get; private set; }

@@ -9,15 +9,13 @@ namespace TransactionUtility.TransactionTool
     public class LogWriter:IDisposable
 	{
         StreamWriter outputFile;
-        public LogWriter(string folder,string fileNameSuffix) {
+        public LogWriter(string fileFullName) {
 
-            var fileName = Path.Combine(folder, DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss.ff-") + fileNameSuffix);
-
-            File.WriteAllText(fileName, "");
+            File.WriteAllText(fileFullName, "");
 
             StringWriter t = new StringWriter();
 
-            outputFile = new StreamWriter(fileName);
+            outputFile = new StreamWriter(fileFullName);
 
         }
 
