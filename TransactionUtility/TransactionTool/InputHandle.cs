@@ -15,7 +15,7 @@ namespace TransactionUtility.TransactionTool
         {
         }
 
-        internal Dictionary<string, DataTable> GetData(List<string> sheets)
+        internal Dictionary<string, DataTable> GetRawDataTables(List<string> sheets)
         {
             Dictionary<string, DataTable> pairs = new Dictionary<string, DataTable>();
             WriteLog($"...");

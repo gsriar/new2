@@ -8,6 +8,7 @@ namespace TransactionUtility.Model
 {
     public class DataObject
     {
+        private string _isCalculated;
 
         public DataObject(string dataObject, string alias, string isCalculated, string evaluationQuery)
         {
@@ -21,11 +22,12 @@ namespace TransactionUtility.Model
 
 		public string Alias { get; private set; } 
 
-        public string IsCalculated { get; private set; }
+        private string IsCalculated { get { return _isCalculated; }  set { _isCalculated = (value ?? "").ToUpper().Trim(); } }
 
 		public string EvaluationQuery { get; private set; }
 
         public List<FieldDef> FieldDefCollection { get; set; }
+        public bool IsComputed { get { return IsCalculated == "Y"; } }
 
         public FieldDef GetFieldDef(string alias)
         {

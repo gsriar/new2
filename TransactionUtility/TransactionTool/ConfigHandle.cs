@@ -13,9 +13,7 @@ namespace TransactionUtility.TransactionTool
         List<DataObject> dataObjectCollection = new List<DataObject>();
         List<MeasureDef> measureDefCollection = new List<MeasureDef>();
         Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
-        private object flMeasure;
-        private bool flEmp;
-
+        
         public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate, "Config") { }
 
         public void Initilize()
@@ -23,10 +21,17 @@ namespace TransactionUtility.TransactionTool
             LoadDefinition();
         }
 
-        public List<string> GetClientSheetNameList()
+        public List<string> GetBaseDataObjectNames()
         {
             List<string> result = new List<string>();
-            dataObjectCollection.ForEach(d => result.Add(d.DataObjectName));
+            dataObjectCollection.ForEach(d => { if (!d.IsComputed) result.Add(d.DataObjectName); });
+            return result;
+        }
+
+        public List<string> GetComputedDataObjectNames()
+        {
+            List<string> result = new List<string>();
+            dataObjectCollection.ForEach(d => { if (d.IsComputed) result.Add(d.DataObjectName); });
             return result;
         }
 
@@ -57,6 +62,21 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
+        internal void ValidateComputedDataObjects()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void SetComputedDataContext(SQLContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void ExecuteComputedDataObjects(SQLContext context)
+        {
+            throw new NotImplementedException();
+        }
+
         public void WriteMeasureOutput(IWriter writer)
         {
             WriteLog("...");
@@ -68,7 +88,7 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
-            public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
+        public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
         {
             WriteLog("...");
             foreach (var key in objDataDictionary.Keys)
@@ -84,6 +104,10 @@ namespace TransactionUtility.TransactionTool
 
                 dataContextDictionary[dataObj] = ctx;
             }
+        }
+
+        public void UpsertBaseData(SQLContext context)
+        {
         }
 
         private void LoadDefinition()
@@ -155,7 +179,7 @@ namespace TransactionUtility.TransactionTool
                     fld.Alias = row[Constants.ColumnFields.Alias] as string;
                     fld.DataType = row[Constants.ColumnFields.DataType] as string;
                     fld.IsNullable = row[Constants.ColumnFields.IsNullable] as string;
-                    fld.SetIsCalculated = row[Constants.ColumnFields.IsComputed] as string;
+                    fld.SetIsComputed = row[Constants.ColumnFields.IsComputed] as string;
                     fld.Formula = row[Constants.ColumnFields.ComputeFormula] as string;
                     fld.Remarks = row[Constants.ColumnFields.Remarks] as string;
 

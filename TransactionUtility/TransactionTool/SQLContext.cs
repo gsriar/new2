@@ -13,7 +13,6 @@ namespace TransactionUtility.TransactionTool
 
         private Action<string> logDelegate=null;
 
-
         public SQLContext(Action<string> LogDelegate)
         {
             //this.logDelegate = LogDelegate;

@@ -42,11 +42,20 @@ namespace TransactionUtility
 
                 inputHandle = new InputHandle(inputParameter.InputExcelFilePath, logWriter.Write);
 
-                var rawdata = inputHandle.GetData(configHandle.GetClientSheetNameList());
+                var rawDataTables = inputHandle.GetRawDataTables(configHandle.GetBaseDataObjectNames());
 
-                configHandle.SetDataContext(rawdata);
+                configHandle.SetDataContext(rawDataTables);
 
                 configHandle.Validate();
+
+                //insert data in sql
+                configHandle.UpsertBaseData(context);
+
+                //set computed data tables
+                configHandle.SetComputedDataContext(context);
+
+                //validate computed data types
+                configHandle.ValidateComputedDataObjects();
 
                 var outputfile = Path.Combine(inputParameter.LogFolder, prefix + inputParameter.OutputFileName);
 

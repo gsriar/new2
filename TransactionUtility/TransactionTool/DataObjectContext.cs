@@ -36,7 +36,7 @@ namespace TransactionUtility.TransactionTool
             int counter = 1;
             foreach (FieldDef fl in dataObject.FieldDefCollection)
             {
-                if (!fl.IsCalculated)
+                if (!fl.IsComputed)
                 {
                     var hasField = columnList.FirstOrDefault(c => string.Equals(fl.DataFieldName, c.ColumnName, StringComparison.OrdinalIgnoreCase));
                     if (hasField == null)
@@ -91,7 +91,7 @@ namespace TransactionUtility.TransactionTool
 
             foreach (FieldDef fl in dataObject.FieldDefCollection)
             {
-                if (!fl.IsCalculated)
+                if (!fl.IsComputed)
                 {
                     newDataTable.Columns.Add(fl.Alias, fl.Type);
                 }
@@ -109,7 +109,7 @@ namespace TransactionUtility.TransactionTool
                 objArray.Clear();
                 foreach (FieldDef fl in dataObject.FieldDefCollection)
                 {
-                    if (fl.IsCalculated)
+                    if (fl.IsComputed)
                     {
                         // objArray.Add(fl.TypeDefault);
                     }
@@ -137,7 +137,7 @@ namespace TransactionUtility.TransactionTool
             {
                 foreach (FieldDef fl in dataObject.FieldDefCollection)
                 {
-                    if (fl.IsCalculated)
+                    if (fl.IsComputed)
                     {
                         newDataTable.Columns.Add(fl.Alias, fl.Type, fl.Formula);
                     }

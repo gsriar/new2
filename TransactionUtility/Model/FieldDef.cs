@@ -36,15 +36,15 @@ namespace TransactionUtility.Model
 
         public string IsNullable { get; set; }
 
-        public string SetIsCalculated
+        public string SetIsComputed
         {
             set
             {
-                _iscalcuated = (value ?? "") == "" ? "N" : value;
+                _iscalcuated = (value ?? "").ToUpper().Trim();
             }
         }
 
-        public bool IsCalculated
+        public bool IsComputed
         {
             get { return _iscalcuated.ToUpper() == "Y"; }
         }
