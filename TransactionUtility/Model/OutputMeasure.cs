@@ -7,23 +7,25 @@ namespace TransactionUtility.Model
 {
 	public class OutputMeasure
 	{
-		public string DataSourceIdentifier { get; set; }
+		public object DataSourceIdentifier { get; set; }
 
-		public string SourceMeasureSystemCode { get; set; }
+		public object SourceMeasureSystemCode { get; set; }
 
-		public string InternalOrgIdentifier { get; set; }
+		public object InternalOrgIdentifier { get; set; }
 
-		public string ExternalEmpIdentifier { get; set; }
+		public object ExternalEmpIdentifier { get; set; }
 
 		public string Date { get; set; }
 
-		public string Periodicity { get; set; }
+		public object Periodicity { get; set; }
 
-		public string SourceMeasureValue { get; set; }
+		public object SourceMeasureValue { get; set; }
 
-		public override string ToString()
+        public static string CsvHeader = "DataSourceIdentifier,SourceMeasureSystemCode,InternalOrgIdentifier,ExternalEmpIdentifier,Date,Periodicity,SourceMeasureValue";
+
+        public override string ToString()
         {
-            throw new NotImplementedException();
+            return $"{DataSourceIdentifier },{SourceMeasureSystemCode},{InternalOrgIdentifier},{ExternalEmpIdentifier},{Date},{Periodicity},{SourceMeasureValue}";
         }
     }
 }

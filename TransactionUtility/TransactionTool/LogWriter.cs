@@ -6,46 +6,24 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-    public class LogWriter:IDisposable
-	{
-        StreamWriter outputFile;
-        public LogWriter(string fileFullName) {
+    class LogWriter : TextFileWriter
+    {
+        public LogWriter(string fileFullName) : base(fileFullName) { }
 
-            File.WriteAllText(fileFullName, "");
+        Action<string> additionalWriter;
+        private int count=1;
 
-            StringWriter t = new StringWriter();
-
-            outputFile = new StreamWriter(fileFullName);
-
-        }
-
-        Action<string> logger;
-
-        public void Add(Action<string> logger)
+        public void Add(Action<string> additionalWriter)
         {
-            this.logger = logger;
-
+            this.additionalWriter = additionalWriter;
         }
-
-        public void Dispose()
+        public override void Write(string text)
         {
-            if(outputFile!=null )
-            {
-                outputFile.Close();
-                outputFile.Dispose();
-                outputFile = null;
-            }
-        }
+            string txt = $"[{count++.ToString("00")}] - {text}";
 
-        int count = 1;
-        public void Write(string text)
-        {
-            string txt=$"[{count++.ToString("00")}] - {text}";
-           
-            outputFile.WriteLine(txt);
-
-            if (this.logger != null)
-                this.logger(txt);
+            base.Write(txt);
+            if (additionalWriter != null)
+                additionalWriter(txt);
         }
     }
 }

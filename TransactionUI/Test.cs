@@ -22,20 +22,21 @@ namespace TransactionUI
 
         private void btnTest_Click(object sender, EventArgs e)
         {
+            OutAttrubute outputAttribute;
             InputParameter inputParam = new InputParameter()
             {
                 InputExcelFilePath = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Data.xlsx",
                 
                 ConfigExcelFilePath = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Mapping.xlsx",
                 OutputFileName = "Result.xlsx",
-                OuptputFolder = @"C:\backup\TransactionUtilityTest\Completed",
+                CompletedFolder = @"C:\backup\TransactionUtilityTest\Completed",
                 ErrorFolder = @"C:\backup\TransactionUtilityTest\Error",
                 LogFolder= @"C:\backup\TransactionUtilityTest\Log"
             };
 
             using (CalculationEngine engine = new CalculationEngine(inputParam, WriteLog))
             {
-                engine.Evaluate();
+                engine.Evaluate(out outputAttribute);
             }
         }
        

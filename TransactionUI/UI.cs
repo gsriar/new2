@@ -13,26 +13,19 @@ namespace TransactionUI
 {
     public partial class Transaction : Form
     {
-        string configFilePath = "configFilePath";
-        string clientDataFilePath = "clientDataFilePath";
-        string errorOutputFolder = "errorOutputFolder";
-        string resultOutputFolder = "resultOutputFolder";
-
+        private string logFile;
+        private string csvFile;
 
         public Transaction()
         {
             InitializeComponent();
-
-
             txtClientDataFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Data.xlsx";
             txtConfigFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Mapping.xlsx";
-            txtOutputFileNamePrefix.Text = "Result.xlsx";
-            txtResultOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Completed";
+            txtOutputFileNameSuffix.Text = "-source-measures.csv";
+            txtCompletedOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Completed";
             txtErrorOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Error";
-            txtErrorOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Log";
-
+            txtLogOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Log";
         }
-
         private void btnBrowseFile_Click(object sender, EventArgs e)
         {
 
@@ -45,26 +38,23 @@ namespace TransactionUI
 
         private void btnProcess_Click(object sender, EventArgs e)
         {
+            OutAttrubute outputAttribute;
             InputParameter inputParam = new InputParameter()
             {
-                /*   txtClientDataFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Data.xlsx";
-            txtConfigFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Mapping.xlsx";
-            txtResult.Text = "Result.xlsx";
-            txtResultOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Completed";
-            txtErrorOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Error";
-            txtErrorOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Log";*/
                 InputExcelFilePath = txtClientDataFilePath.Text,
-
                 ConfigExcelFilePath = txtConfigFilePath.Text,
-                OutputFileName = txtResult.Text,
-                OuptputFolder = txtResultOutputFolder.Text,
-                ErrorFolder = txtErrorOutputFolder.Text ,
-                LogFolder = txtErrorOutputFolder.Text
+                OutputFileName = txtOutputFileNameSuffix.Text,
+                CompletedFolder = txtCompletedOutputFolder.Text,
+                ErrorFolder = txtErrorOutputFolder.Text,
+                LogFolder = txtLogOutputFolder.Text
             };
 
             using (CalculationEngine engine = new CalculationEngine(inputParam, WriteLog))
             {
-                engine.Evaluate();
+                engine.Evaluate(out outputAttribute);
+
+                logFile = outputAttribute.GetAttrib("log");
+                csvFile = outputAttribute.GetAttrib("csv");
             }
         }
 
@@ -73,6 +63,26 @@ namespace TransactionUI
             txtResult.Text = txtResult.Text + logText + Environment.NewLine;
             txtResult.SelectionStart = txtResult.TextLength;
             txtResult.ScrollToCaret();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
+
+        private void linkLog_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Open(logFile);
+        }
+
+        void Open(string fileName)
+        {
+            if (!string.IsNullOrEmpty(fileName))
+                System.Diagnostics.Process.Start(fileName);
+        }
+        private void linkCSV_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Open(csvFile);
         }
     }
 }

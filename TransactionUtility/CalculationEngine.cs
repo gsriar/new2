@@ -14,21 +14,26 @@ namespace TransactionUtility
         LogWriter logWriter;
         SQLContext context;
         InputParameter inputParameter;
+        TextFileWriter outputTextWriter;
         string prefix;
+        string logFileName;
 
         public CalculationEngine(InputParameter inputParameter, Action<string> logDelegate)
         {
             this.inputParameter = inputParameter;
-            prefix = DateTime.Now.ToString("yyyyMMdd HHmmssff");
-            var fileFullName = Path.Combine(this.inputParameter.LogFolder, prefix + "log.txt");
-            logWriter = new LogWriter(fileFullName);
+            prefix = DateTime.Now.ToString("yyyyMMdd-HH.mm.ss.fff-");
+            logFileName = Path.Combine(this.inputParameter.LogFolder, prefix + "log.txt");
+            logWriter = new LogWriter(logFileName);
             logWriter.Add(logDelegate);
+            logWriter.Write($"Log File : {logFileName}");
         }
         
-        public void Evaluate()
+        public void Evaluate(out OutAttrubute outputAttribute)
         {
+            outputAttribute = new OutAttrubute();
             try
             {
+                outputAttribute.add("log", logFileName);
                 context = new SQLContext(logWriter.Write);
 
                 configHandle = new ConfigHandle(inputParameter.ConfigExcelFilePath, logWriter.Write);
@@ -43,9 +48,18 @@ namespace TransactionUtility
 
                 configHandle.Validate();
 
+                var outputfile = Path.Combine(inputParameter.LogFolder, prefix + inputParameter.OutputFileName);
 
-                var meaureDef = configHandle.GetMeasureDefCollection;
+                outputAttribute.add("csv", outputfile);
 
+                outputTextWriter = new TextFileWriter(outputfile);
+
+                logWriter.Write(outputfile);
+
+                outputTextWriter.Write(OutputMeasure.CsvHeader);
+
+
+                configHandle.WriteMeasureOutput(outputTextWriter);
             }
             catch (Exception ex)
             {
@@ -53,10 +67,15 @@ namespace TransactionUtility
             }
         }
 
-        private void MeasureEvaluator(List<MeasureDef> MeasureDefCollection, Action<string> textWriter, Action<string> logwriter)
+        private void MeasureEvaluator(List<MeasureDef> MeasureDefCollection)
         {
+            foreach(MeasureDef mdef in MeasureDefCollection)
+            {
+
+            }
         }
         
+
         public void Dispose()
         {
             if (configHandle != null)
@@ -82,7 +101,11 @@ namespace TransactionUtility
                 logWriter = null;
             }
 
-
+            if (outputTextWriter != null)
+            {
+                outputTextWriter.Dispose();
+                outputTextWriter = null;
+            }
         }
     }
 }

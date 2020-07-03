@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TransactionUtility.Model;
 
@@ -24,6 +25,11 @@ namespace TransactionUtility.Model
 
 		public string EvaluationQuery { get; private set; }
 
-        public List<FieldDef> FieldDef { get; set; }
+        public List<FieldDef> FieldDefCollection { get; set; }
+
+        public FieldDef GetFieldDef(string alias)
+        {
+          return this.FieldDefCollection.FirstOrDefault(f => f.Alias == alias);
+        }
     }
 }

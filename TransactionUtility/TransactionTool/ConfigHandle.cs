@@ -13,8 +13,10 @@ namespace TransactionUtility.TransactionTool
         List<DataObject> dataObjectCollection = new List<DataObject>();
         List<MeasureDef> measureDefCollection = new List<MeasureDef>();
         Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
+        private object flMeasure;
+        private bool flEmp;
 
-        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate,"Config") { }
+        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate, "Config") { }
 
         public void Initilize()
         {
@@ -31,6 +33,23 @@ namespace TransactionUtility.TransactionTool
         public void Validate()
         {
             WriteLog("...");
+            WriteLog("Validating...");
+
+            HashSet<string> dataObjectNames = new HashSet<string>();
+
+            foreach (var measure in measureDefCollection)
+            {
+                if (dataObjectNames.Contains(measure.SourceDataObject))
+                    continue;
+
+                var dto = this.GetDataObject(measure.SourceDataObject);
+                if (dto == null)
+                {
+                    throw new Exception($"DataObject (alias:[{measure.SourceDataObject}]) doesn't exist. Source Measure Name [{measure.SourceMeasure}]");
+                }
+                dataObjectNames.Add(measure.SourceDataObject);
+            }
+
             foreach (DataObject key in dataContextDictionary.Keys)
             {
                 var ctx = dataContextDictionary[key];
@@ -38,7 +57,18 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
-        public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
+        public void WriteMeasureOutput(IWriter writer)
+        {
+            WriteLog("...");
+            WriteLog("Writing Measure Output");
+            foreach (DataObject dto in dataContextDictionary.Keys)
+            {
+                var dataObjCtx = dataContextDictionary[dto];
+                dataObjCtx.WriteMeasureOutput(writer);
+            }
+        }
+
+            public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
         {
             WriteLog("...");
             foreach (var key in objDataDictionary.Keys)
@@ -46,11 +76,13 @@ namespace TransactionUtility.TransactionTool
                 WriteLog($"Set DataContext :[{key}]");
                 var table = objDataDictionary[key];
 
-                var obj = dataObjectCollection.FirstOrDefault(d => string.Equals(d.DataObjectName, key, StringComparison.OrdinalIgnoreCase));
+                var dataObj = dataObjectCollection.FirstOrDefault(d => string.Equals(d.DataObjectName, key, StringComparison.OrdinalIgnoreCase));
 
-                DataObjectContext ctx = new DataObjectContext(obj, table, WriteLog);
+                var measureList = measureDefCollection.FindAll(m => m.SourceDataObject == dataObj.Alias).ToList();
 
-                dataContextDictionary[obj] = ctx;
+                DataObjectContext ctx = new DataObjectContext(dataObj, table, WriteLog, measureList);
+
+                dataContextDictionary[dataObj] = ctx;
             }
         }
 
@@ -81,8 +113,6 @@ namespace TransactionUtility.TransactionTool
             CommonFunctions.DeleteTableRows(this.GetDataTable(Constants.SheetMeasureDefinition), deleteQuery2);
 
             DataTable dt = this.GetDataTable(Constants.SheetDataFiledDefinition);
-            
-           //riteLog(Environment.NewLine + dt.ToCSV());
         }
 
         void LoadDataObject(DataTable sheetDataObject)
@@ -134,7 +164,7 @@ namespace TransactionUtility.TransactionTool
                     FieldDefCollection.Add(fld);
                 }
 
-                dataObject.FieldDef = FieldDefCollection;
+                dataObject.FieldDefCollection = FieldDefCollection;
 
             }
 
@@ -177,9 +207,9 @@ namespace TransactionUtility.TransactionTool
             return dataContextDictionary[dataObj];
         }
 
-        public DataObject GetDataObject(string Name)
+        public DataObject GetDataObject(string alias)
         {
-            return dataObjectCollection.FirstOrDefault(d => d.DataObjectName == Name);
+            return dataObjectCollection.FirstOrDefault(d => string.Equals(d.Alias, alias, StringComparison.OrdinalIgnoreCase));
         }
 
         public List<MeasureDef> GetMeasureDefCollection

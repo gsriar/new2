@@ -8,16 +8,11 @@ namespace TransactionUtility
 {
 	public class InputParameter
 	{
-		public InputParameter()
-		{
-			
-		}
-
 		public string ConfigExcelFilePath { get; set; }
 
 		public string InputExcelFilePath { get; set; }
 
-		public string OuptputFolder { get; set; }
+		public string CompletedFolder { get; set; }
 
 		public string OutputFileName { get; set; }
 
