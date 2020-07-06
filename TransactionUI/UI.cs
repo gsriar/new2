@@ -19,12 +19,14 @@ namespace TransactionUI
         public Transaction()
         {
             InitializeComponent();
-            txtClientDataFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Data.xlsx";
-            txtConfigFilePath.Text = @"C:\Gurbhej\EXL\FinalCodeBase\TransactionUtility\Excel\Mapping.xlsx";
+            txtClientDataFilePath.Text = @"..\..\..\TransactionUtility\Excel\Data.xlsx";
+            txtConfigFilePath.Text = @"..\..\..\TransactionUtility\Excel\Mapping.xlsx";
             txtOutputFileNameSuffix.Text = "-source-measures.csv";
-            txtCompletedOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Completed";
-            txtErrorOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Error";
-            txtLogOutputFolder.Text = @"C:\backup\TransactionUtilityTest\Log";
+
+            var bp= @"C:\Gurbhej\TransactionUtilityTest";
+            txtCompletedOutputFolder.Text = $@"{bp}\Completed";
+            txtErrorOutputFolder.Text = $@"{bp}\Error";
+            txtLogOutputFolder.Text = $@"{bp}\Log";
         }
         private void btnBrowseFile_Click(object sender, EventArgs e)
         {

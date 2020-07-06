@@ -20,13 +20,12 @@ namespace TransactionUtility.TransactionTool
         {
             this.logDelegate = LogDelegate;
             WriteLog($"...");
-            
-            WriteLog($"[{title}] Excel: {excelFilePath}");
-           
             FileInfo fi = new FileInfo(excelFilePath);
 
+            WriteLog($"[{title}] Excel: {fi.FullName}");
+
             if (!fi.Exists)
-                throw new Exception($"File does not exists [{fi.Name}]");
+                throw new Exception($"File does not exists [{fi.FullName}]");
 
             if (fi.Extension.ToLower() != ".xlsx")
                 throw new Exception($"File is not (.xlsx) extension");

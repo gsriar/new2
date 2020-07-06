@@ -12,7 +12,7 @@ namespace TransactionUtility
         ConfigHandle configHandle;
         InputHandle inputHandle;
         LogWriter logWriter;
-        SQLContext context;
+        SQLContext sqlContext;
         InputParameter inputParameter;
         TextFileWriter outputTextWriter;
         string prefix;
@@ -34,7 +34,7 @@ namespace TransactionUtility
             try
             {
                 outputAttribute.add("log", logFileName);
-                context = new SQLContext(logWriter.Write);
+                sqlContext = new SQLContext(logWriter.Write);
 
                 configHandle = new ConfigHandle(inputParameter.ConfigExcelFilePath, logWriter.Write);
 
@@ -49,13 +49,10 @@ namespace TransactionUtility
                 configHandle.Validate();
 
                 //insert data in sql
-                configHandle.UpsertBaseData(context);
-
-                //set computed data tables
-                configHandle.SetComputedDataContext(context);
+                configHandle.RunComputedDataObjects(sqlContext);
 
                 //validate computed data types
-                configHandle.ValidateComputedDataObjects();
+                //configHandle.ValidateComputedDataObjects();
 
                 var outputfile = Path.Combine(inputParameter.LogFolder, prefix + inputParameter.OutputFileName);
 
@@ -99,9 +96,9 @@ namespace TransactionUtility
                 inputHandle = null;
             }
 
-            if (context != null)
+            if (sqlContext != null)
             {
-                context.Dispose();
+                sqlContext.Dispose();
             }
 
             if (logWriter != null)

@@ -13,7 +13,8 @@ namespace TransactionUtility.TransactionTool
         List<DataObject> dataObjectCollection = new List<DataObject>();
         List<MeasureDef> measureDefCollection = new List<MeasureDef>();
         Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
-        
+        private bool isBaseDataPersisted;
+
         public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate, "Config") { }
 
         public void Initilize()
@@ -62,20 +63,63 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
+        internal void RunComputedDataObjects(SQLContext sqlContext)
+        {
+            //insert data in sql
+            this.UpsertBaseDataObjects(sqlContext);
+            //set computed data tables
+            this.ExecuteComputedDataObjectQuery(sqlContext);
+        }
+
+        private void UpsertBaseDataObjects(SQLContext sqlContext)
+        {
+            if (!isBaseDataPersisted)
+            {
+                foreach (DataObject dbo in this.dataContextDictionary.Keys.Where(d => !d.IsComputed))
+                {
+                    var ctx = dataContextDictionary[dbo];
+                    if (!ctx.IsSQLTableCreated)
+                    {
+                        var sql1 = ctx.GetCreateTableQuery();
+                        WriteLog(Environment.NewLine + sql1);
+                        sqlContext.ExecuteNonQuery( sql1);
+                        WriteLog("Table Created...");
+                        WriteLog("----");
+                    }
+                   
+                    if (!ctx.IsDataInserted)
+                    {
+                        var sql2 = ctx.GetInsertQuery();
+                        var idx = sql2.NthIndexOf(Environment.NewLine, 3);
+                        if (idx > -1)
+                            WriteLog(Environment.NewLine+ sql2.Substring(0, idx)+ "...................");
+                        else
+                            WriteLog(sql2);
+
+                        sqlContext.ExecuteNonQuery(sql2);
+                        WriteLog("Data Inserted...");
+                        WriteLog("----");
+                    }
+                   
+                    isBaseDataPersisted = true;
+                }
+            }
+        }
+        
+
+        internal void ExecuteComputedDataObjectQuery(SQLContext context)
+        {
+            foreach (var dbo in this.dataObjectCollection.Where(d => d.IsComputed))
+            {
+            }
+        }
+
         internal void ValidateComputedDataObjects()
         {
             throw new NotImplementedException();
         }
 
-        internal void SetComputedDataContext(SQLContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void ExecuteComputedDataObjects(SQLContext context)
-        {
-            throw new NotImplementedException();
-        }
+      
 
         public void WriteMeasureOutput(IWriter writer)
         {
@@ -106,9 +150,6 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
-        public void UpsertBaseData(SQLContext context)
-        {
-        }
 
         private void LoadDefinition()
         {

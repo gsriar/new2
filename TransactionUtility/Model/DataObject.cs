@@ -14,7 +14,7 @@ namespace TransactionUtility.Model
         {
             this.DataObjectName = dataObject;
             this.Alias = alias;
-            this.IsCalculated = IsCalculated;
+            this._isCalculated = isCalculated;
             this.EvaluationQuery = evaluationQuery;
         }
 

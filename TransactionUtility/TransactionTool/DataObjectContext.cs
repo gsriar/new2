@@ -147,10 +147,19 @@ namespace TransactionUtility.TransactionTool
         }
 
         public bool IsDataObjectClaculationDone { get; private set; }
+        public bool IsSQLTableCreated { get; internal set; }
+        public bool IsDataInserted { get; internal set; }
 
-        public DataTable RunCalculatedDataObjectQuery()
+        public string GetCreateTableQuery()
         {
-            throw new NotImplementedException();
+            WriteLog($"CREATE TABLE QUERY [{this.dataObject.Alias}] ");
+            return SQLTool.GetCreateFromDataTableSQL(this.dataObject.Alias, newDataTable);
+        }
+
+        public string GetInsertQuery()
+        {
+            WriteLog($"INSERT QUERY [{this.dataObject.Alias}] ");
+            return SQLTool.GetInsertSQL(this.dataObject.Alias, newDataTable);
         }
 
         public bool ValidateCaluclatedDataObject(DataTable table)

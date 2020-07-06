@@ -21,6 +21,23 @@ namespace TransactionUtility
                 row.Delete();
         }
 
+        public static int NthIndexOf(this string str,string text, int n)
+        {
+            int i = str.IndexOf(text);
+            int last = i;
+            while (--n > 0)
+            {
+                if (i > -1 && i + 1 < str.Length)
+                {
+                    i = str.IndexOf(text, last + 1);
+                    if (i == -1)
+                        break;
+                }
+                last = i;
+            }
+            return last;
+        }
+
         public static string ToCSV(this DataTable table)
         {
            

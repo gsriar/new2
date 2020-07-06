@@ -15,11 +15,12 @@ namespace TransactionUtility.TransactionTool
 
         public SQLContext(Action<string> LogDelegate)
         {
-            //this.logDelegate = LogDelegate;
-            //string cs = "Data Source=:memory:";
+            this.logDelegate = LogDelegate;
+            string cs = "Data Source=:memory:";
 
-            //conn = new SQLiteConnection(cs);
-            //conn.Open();
+            conn = new SQLiteConnection(cs);
+            conn.Open();
+            WriteLog("Open in memory SQLite Connection");
         }
 
         public void Dispose()
@@ -34,9 +35,9 @@ namespace TransactionUtility.TransactionTool
 
         public int ExecuteNonQuery(string query)
         {
-            throw new NotImplementedException();
+            SQLiteCommand command = new SQLiteCommand(query, conn);
+            return command.ExecuteNonQuery();
         }
-
         public DataTable ExecuteQuery()
         {
             throw new NotImplementedException();

@@ -78,12 +78,14 @@
     <Compile Include="Model\FieldDef.cs" />
     <Compile Include="Model\MeasureDef.cs" />
     <Compile Include="Model\OutputMeasure.cs" />
-    <Compile Include="OutAttrubutes.cs" />
+    <Compile Include="Model\OutAttrubutes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CalculationEngine.cs" />
+    <Compile Include="Common\SQLTool.cs" />
     <Compile Include="TransactionTool\ConfigHandle.cs" />
     <Compile Include="TransactionTool\DataObjectContext.cs" />
     <Compile Include="TransactionTool\IWriter.cs" />
+    <Compile Include="TransactionTool\Log.cs" />
     <Compile Include="TransactionTool\MeasureEvaluator.cs" />
     <Compile Include="TransactionTool\TextFileWriter.cs" />
     <Compile Include="TransactionTool\PersistedDataObject.cs" />
