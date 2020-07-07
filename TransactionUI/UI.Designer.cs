@@ -52,15 +52,19 @@
             this.txtConfigFilePath = new System.Windows.Forms.TextBox();
             this.lblConfigPath = new System.Windows.Forms.Label();
             this.tabPageTest = new System.Windows.Forms.TabPage();
+            this.txtClientFile = new System.Windows.Forms.TextBox();
+            this.btnBrowseClientFile = new System.Windows.Forms.Button();
+            this.btnGetClientFileConfig = new System.Windows.Forms.Button();
             this.tabMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
+            this.tabPageTest.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabMain
             // 
             this.tabMain.Controls.Add(this.tabPageMain);
             this.tabMain.Controls.Add(this.tabPageTest);
-            this.tabMain.Location = new System.Drawing.Point(2, 2);
+            this.tabMain.Location = new System.Drawing.Point(3, 1);
             this.tabMain.Name = "tabMain";
             this.tabMain.SelectedIndex = 0;
             this.tabMain.Size = new System.Drawing.Size(784, 592);
@@ -127,9 +131,10 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(76, 26);
             this.button2.TabIndex = 34;
-            this.button2.Tag = "resultOutputFolder";
+            this.button2.Tag = "logOutputFolder";
             this.button2.Text = "Browse";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.btnBrowseFolder_Click);
             // 
             // txtLogOutputFolder
             // 
@@ -160,7 +165,7 @@
             this.txtResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtResult.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtResult.HideSelection = false;
-            this.txtResult.Location = new System.Drawing.Point(15, 273);
+            this.txtResult.Location = new System.Drawing.Point(15, 275);
             this.txtResult.Margin = new System.Windows.Forms.Padding(4);
             this.txtResult.Multiline = true;
             this.txtResult.Name = "txtResult";
@@ -179,11 +184,12 @@
             this.button3.Tag = "resultOutputFolder";
             this.button3.Text = "Browse";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.btnBrowseFolder_Click);
             // 
             // btnBrowseFolder
             // 
             this.btnBrowseFolder.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBrowseFolder.Location = new System.Drawing.Point(679, 97);
+            this.btnBrowseFolder.Location = new System.Drawing.Point(679, 129);
             this.btnBrowseFolder.Margin = new System.Windows.Forms.Padding(1);
             this.btnBrowseFolder.Name = "btnBrowseFolder";
             this.btnBrowseFolder.Size = new System.Drawing.Size(76, 22);
@@ -191,6 +197,7 @@
             this.btnBrowseFolder.Tag = "errorOutputFolder";
             this.btnBrowseFolder.Text = "Browse";
             this.btnBrowseFolder.UseVisualStyleBackColor = true;
+            this.btnBrowseFolder.Click += new System.EventHandler(this.btnBrowseFolder_Click);
             // 
             // button1
             // 
@@ -203,6 +210,7 @@
             this.button1.Tag = "clientDataFilePath";
             this.button1.Text = "Browse";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.btnBrowseFile_Click);
             // 
             // btnBrowse
             // 
@@ -215,6 +223,7 @@
             this.btnBrowse.Tag = "configFilePath";
             this.btnBrowse.Text = "Browse";
             this.btnBrowse.UseVisualStyleBackColor = true;
+            this.btnBrowse.Click += new System.EventHandler(this.btnBrowseFile_Click);
             // 
             // btnProcess
             // 
@@ -332,13 +341,47 @@
             // 
             // tabPageTest
             // 
+            this.tabPageTest.BackColor = System.Drawing.Color.LightGray;
+            this.tabPageTest.Controls.Add(this.btnGetClientFileConfig);
+            this.tabPageTest.Controls.Add(this.btnBrowseClientFile);
+            this.tabPageTest.Controls.Add(this.txtClientFile);
             this.tabPageTest.Location = new System.Drawing.Point(4, 23);
             this.tabPageTest.Name = "tabPageTest";
             this.tabPageTest.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageTest.Size = new System.Drawing.Size(776, 565);
             this.tabPageTest.TabIndex = 1;
             this.tabPageTest.Text = "Test";
-            this.tabPageTest.UseVisualStyleBackColor = true;
+            // 
+            // txtClientFile
+            // 
+            this.txtClientFile.Location = new System.Drawing.Point(21, 25);
+            this.txtClientFile.Multiline = true;
+            this.txtClientFile.Name = "txtClientFile";
+            this.txtClientFile.Size = new System.Drawing.Size(659, 39);
+            this.txtClientFile.TabIndex = 0;
+            // 
+            // btnBrowseClientFile
+            // 
+            this.btnBrowseClientFile.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBrowseClientFile.Location = new System.Drawing.Point(684, 42);
+            this.btnBrowseClientFile.Margin = new System.Windows.Forms.Padding(1);
+            this.btnBrowseClientFile.Name = "btnBrowseClientFile";
+            this.btnBrowseClientFile.Size = new System.Drawing.Size(76, 22);
+            this.btnBrowseClientFile.TabIndex = 28;
+            this.btnBrowseClientFile.Tag = "rawClientDataFile";
+            this.btnBrowseClientFile.Text = "Browse";
+            this.btnBrowseClientFile.UseVisualStyleBackColor = true;
+            this.btnBrowseClientFile.Click += new System.EventHandler(this.btnBrowseFile_Click);
+            // 
+            // btnGetClientFileConfig
+            // 
+            this.btnGetClientFileConfig.Location = new System.Drawing.Point(21, 115);
+            this.btnGetClientFileConfig.Name = "btnGetClientFileConfig";
+            this.btnGetClientFileConfig.Size = new System.Drawing.Size(75, 23);
+            this.btnGetClientFileConfig.TabIndex = 29;
+            this.btnGetClientFileConfig.Text = "Get";
+            this.btnGetClientFileConfig.UseVisualStyleBackColor = true;
+            this.btnGetClientFileConfig.Click += new System.EventHandler(this.btnGetClientFileConfig_Click);
             // 
             // Transaction
             // 
@@ -353,6 +396,8 @@
             this.tabMain.ResumeLayout(false);
             this.tabPageMain.ResumeLayout(false);
             this.tabPageMain.PerformLayout();
+            this.tabPageTest.ResumeLayout(false);
+            this.tabPageTest.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -383,5 +428,8 @@
         private System.Windows.Forms.Label lblLog;
         private System.Windows.Forms.LinkLabel linkLog;
         private System.Windows.Forms.LinkLabel linkCSV;
+        private System.Windows.Forms.Button btnBrowseClientFile;
+        private System.Windows.Forms.TextBox txtClientFile;
+        private System.Windows.Forms.Button btnGetClientFileConfig;
     }
 }

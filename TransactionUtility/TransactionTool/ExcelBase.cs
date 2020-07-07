@@ -8,7 +8,7 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-    public class ExcelBase : IExcelConnection
+    public class ExcelBase : IExcelConnection, IDisposable
     {
         protected XLWorkbook workBook;
         private List<string> allSheets;
@@ -82,6 +82,7 @@ namespace TransactionUtility.TransactionTool
             int count = 0;
             //Loop through the Worksheet rows.
             bool firstRow = true;
+
             foreach (IXLRow row in workSheet.Rows())
             {
                 count++;
@@ -107,8 +108,7 @@ namespace TransactionUtility.TransactionTool
                         dt.Rows.Add();
                         int i = 0;
 
-                        foreach (IXLCell cell in row.Cells(row.FirstCellUsed().Address.ColumnNumber, row.LastCellUsed().Address.ColumnNumber))
-                        //foreach (IXLCell cell in row.Cells())
+                        foreach (IXLCell cell in row.Cells(row.FirstCell().Address.ColumnNumber, row.LastCellUsed().Address.ColumnNumber))
                         {
                             dt.Rows[dt.Rows.Count - 1][i] = cell.Value ?? "".ToString();
                             i++;
@@ -120,6 +120,56 @@ namespace TransactionUtility.TransactionTool
             tableCollection[sheetName] = dt;
             return dt;
         }
+
+        public DataTable GetHeaderRowDataTable(string sheetName, int headerRow = 1)
+        {
+            if (tableCollection.ContainsKey(sheetName))
+                return tableCollection[sheetName];
+
+            var sheets = GetAllSheetNameList();
+
+            if (!sheets.Contains(sheetName))
+            {
+                throw new Exception($"Workbook [{excelFile.Name}] does not contain sheet [{sheetName}]");
+            }
+
+
+            if (headerRow <= 0)
+                headerRow = 1;
+
+            //Read the first Sheet from Excel file.
+            IXLWorksheet workSheet = workBook.Worksheet(sheetName);
+
+            //Create a new DataTable.
+            DataTable dt = new DataTable();
+
+            int count = 0;
+            //Loop through the Worksheet rows.
+            bool firstRow = true;
+
+            foreach (IXLRow row in workSheet.Rows())
+            {
+                count++;
+                if (count < headerRow)
+                {
+                    continue;
+                }
+
+                //Use the first row to add columns to DataTable.
+                if (firstRow)
+                {
+                    foreach (IXLCell cell in row.Cells())
+                    {
+                        dt.Columns.Add(cell.Value.ToString());
+                    }
+                    firstRow = false;
+                }
+                break;
+            }
+
+            return dt;
+        }
+
 
         public void WriteLog(string logtext)
         {

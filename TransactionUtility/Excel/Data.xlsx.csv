@@ -1,0 +1,16 @@
+DataObject	Alias
+Sheet1	Sheet1
+
+Sheet2	Sheet2
+
+DataObject	DataFieldName	Alias
+Sheet1	Segment	Segment
+Sheet1	Country	Country
+Sheet1	Product	Product
+Sheet1	Discount Band	Discount Band
+Sheet1	Units Sold	Units Sold
+Sheet1	Manufacturing Price	Manufacturing Price
+Sheet1	Sale Price	Sale Price
+Sheet1	Gross Sales	Gross Sales
+Sheet2	Name	Name
+Sheet2	Value	Value

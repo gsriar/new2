@@ -74,6 +74,7 @@
     <Compile Include="Common\CommonFunctions.cs" />
     <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\SQlTemp.cs" />
+    <Compile Include="DataHelper.cs" />
     <Compile Include="Model\DataFieldType.cs" />
     <Compile Include="Model\DataObject.cs" />
     <Compile Include="Model\FieldDef.cs" />

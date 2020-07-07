@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace TransactionUI
     {
         private string logFile;
         private string csvFile;
+       static string bp = @"C:\Gurbhej\TransactionUtilityTest";
 
         public Transaction()
         {
@@ -23,19 +25,10 @@ namespace TransactionUI
             txtConfigFilePath.Text = @"..\..\..\TransactionUtility\Excel\Mapping.xlsx";
             txtOutputFileNameSuffix.Text = "-source-measures.csv";
 
-            var bp= @"C:\Gurbhej\TransactionUtilityTest";
+
             txtCompletedOutputFolder.Text = $@"{bp}\Completed";
             txtErrorOutputFolder.Text = $@"{bp}\Error";
             txtLogOutputFolder.Text = $@"{bp}\Log";
-        }
-        private void btnBrowseFile_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnBrowseFolder_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void btnProcess_Click(object sender, EventArgs e)
@@ -67,11 +60,6 @@ namespace TransactionUI
             txtResult.ScrollToCaret();
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-
-        }
-
         private void linkLog_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Open(logFile);
@@ -85,6 +73,105 @@ namespace TransactionUI
         private void linkCSV_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Open(csvFile);
+        }
+
+        OpenFileDialog openFileDialog1 = new OpenFileDialog
+        {
+            InitialDirectory = bp,
+            Title = "Browse XLSX Files",
+
+            CheckFileExists = true,
+            CheckPathExists = true,
+
+            DefaultExt = "txt",
+            Filter = "excel files (*.xlsx)|*.xlsx",
+            FilterIndex = 2,
+            RestoreDirectory = true,
+
+            ReadOnlyChecked = true,
+            ShowReadOnly = true
+        };
+
+        FolderBrowserDialog folderDlg = new FolderBrowserDialog()
+        {
+            ShowNewFolderButton = true,
+            RootFolder = Environment.SpecialFolder.Desktop,
+            SelectedPath = bp
+
+        };
+
+        private void btnBrowseFile_Click(object sender, EventArgs e)
+        {
+            TextBox tb = getTB((sender as Button).Tag.ToString());
+           
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                tb.Text = openFileDialog1.FileName;
+            }
+        }
+
+        private void btnBrowseFolder_Click(object sender, EventArgs e)
+        {
+            TextBox tb = getTB((sender as Button).Tag.ToString());
+
+            DialogResult result = folderDlg.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                tb.Text = folderDlg.SelectedPath;
+                Environment.SpecialFolder root = folderDlg.RootFolder;
+            }
+        }
+
+
+        const string errorOutputFolder = "errorOutputFolder";
+        const string resultOutputFolder = "resultOutputFolder";
+        const string logOutputFolder = "logOutputFolder";
+        const string configFilePath = "configFilePath";
+        const string clientDataFilePath = "clientDataFilePath";
+        const string rawClientDataFile = "rawClientDataFile";
+
+        private TextBox getTB(string tag)
+        {
+            TextBox result = null;
+            switch (tag)
+            {
+                case errorOutputFolder:
+                    result = txtErrorOutputFolder;
+                    break;
+                case resultOutputFolder:
+                    result = txtCompletedOutputFolder;
+                    break;
+                case logOutputFolder:
+                    result = txtLogOutputFolder;
+                    break;
+                case configFilePath:
+                    result = txtConfigFilePath;
+                    break;
+                case clientDataFilePath:
+                    result = txtClientDataFilePath;
+                    break;
+                case rawClientDataFile:
+                    result = txtClientFile;
+                    break;
+
+            }
+            return result;
+        }
+
+        private void btnGetClientFileConfig_Click(object sender, EventArgs e)
+        {
+            DataHelper h = new DataHelper();
+            try
+            {
+                FileInfo fi = new FileInfo(txtClientDataFilePath.Text);
+                var str = h.getClientConfigData(fi.FullName);
+                File.WriteAllText(fi.FullName + ".csv", str);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
     }
 }
