@@ -20,7 +20,8 @@ namespace TransactionUtility
                 var allSheets = h.GetAllSheetNameList();
 
                 sb.Append("DataObject").Append(saparator).Append("Alias").AppendLine();
-                allSheets.ForEach(s => sb.Append(s).Append(saparator).Append(s).AppendLine().AppendLine());
+                allSheets.ForEach(s => sb.Append(s).Append(saparator).Append(s).AppendLine());
+                sb.AppendLine();
                 sb.Append("DataObject").Append(saparator).Append("DataFieldName").Append(saparator).Append("Alias").AppendLine();
                 foreach (var sheet in allSheets)
                 {

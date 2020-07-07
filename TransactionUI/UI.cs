@@ -99,6 +99,7 @@ namespace TransactionUI
             SelectedPath = bp
 
         };
+        private string outSchemaFile;
 
         private void btnBrowseFile_Click(object sender, EventArgs e)
         {
@@ -163,15 +164,26 @@ namespace TransactionUI
             DataHelper h = new DataHelper();
             try
             {
-                FileInfo fi = new FileInfo(txtClientDataFilePath.Text);
+                lblStatus.Text = "";
+                linkSchema.Visible = false;
+                FileInfo fi = new FileInfo(txtClientFile.Text);
                 var str = h.getClientConfigData(fi.FullName);
-                File.WriteAllText(fi.FullName + ".csv", str);
+                outSchemaFile = fi.FullName + ".schema.xlsx";
+                File.WriteAllText(outSchemaFile, str);
+                lblStatus.Text = $"Done.. [{outSchemaFile}]";
+
+                linkSchema.Visible = true;
             }
             catch(Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
 
+        }
+
+        private void lblSchema_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Open(outSchemaFile); 
         }
     }
 }
