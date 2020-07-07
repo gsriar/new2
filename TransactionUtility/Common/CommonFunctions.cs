@@ -15,6 +15,12 @@ namespace TransactionUtility
             table.AcceptChanges();
             return table;
         }
+
+        public static bool IsDbNull(this object obj)
+        {
+            return (obj == DBNull.Value || obj == null);
+        }
+
         public static void Delete(this IEnumerable<DataRow> rows)
         {
             foreach (var row in rows)
@@ -73,9 +79,8 @@ namespace TransactionUtility
                     result = 0;
                     break;
                 default:
-                    result = "";
+                    result = string.Empty;
                     break;
-
             }
 
             return result;
@@ -105,7 +110,7 @@ namespace TransactionUtility
             return result;
         }
 
-        public static object ConvertObjType(object o, string typeText, Type _type)
+        public static object ConvertType(object o, string typeText, Type _type)
         {
             object result = o;
 

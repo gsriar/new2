@@ -32,7 +32,9 @@ namespace TransactionUtility.TransactionTool
                 columnList.Add(col);
             }
 
+            WriteLog($"Data Object [{dataObject.DataObjectName}] alias [{dataObject.Alias}]");
             WriteLog($"Validating Column Names");
+
             int counter = 1;
             foreach (FieldDef fl in dataObject.FieldDefCollection)
             {
@@ -58,6 +60,10 @@ namespace TransactionUtility.TransactionTool
                 {
                     throw new Exception($"Date Mapping Field (DataObject[{mdef.SourceDataObject}] alias:[{mdef.SourceDateMappingField}]) doesn't exist. Measure[{mdef.SourceMeasure}]");
                 }
+                else if (flDdate.Type != typeof(DateTime))
+                {
+                    //throw new Exception($"Date Mapping Field (DataObject[{mdef.SourceDataObject}] alias:[{mdef.SourceDateMappingField}]) is not of Date Type. Measure[{mdef.SourceMeasure}]");
+                }
 
                 if (flSourceMeasure == null)
                 {
@@ -75,9 +81,10 @@ namespace TransactionUtility.TransactionTool
                 }
             }
 
-            CreateDataTable();
             WriteLog($"Load and Validate Row Level Data");
-            LoadNewDataTable();
+
+            RowWiseValidate();
+
             EvaluatedComputedColumn();
 
             WriteLog($"Validating Successfull");
@@ -85,21 +92,10 @@ namespace TransactionUtility.TransactionTool
             return true;
         }
 
-        private void CreateDataTable()
-        {
-            newDataTable = new DataTable();
 
-            foreach (FieldDef fl in dataObject.FieldDefCollection)
-            {
-                if (!fl.IsComputed)
-                {
-                    newDataTable.Columns.Add(fl.Alias, fl.Type);
-                }
-            }
-        }
-
-        private void LoadNewDataTable()
+        private void RowWiseValidate()
         {
+            CreateNewDataTable();
             List<object> objArray = new List<object>();
 
             int rowNum = 1;
@@ -107,23 +103,46 @@ namespace TransactionUtility.TransactionTool
             {
                 rowNum++;
                 objArray.Clear();
-                foreach (FieldDef fl in dataObject.FieldDefCollection)
+                foreach (FieldDef field in dataObject.FieldDefCollection)
                 {
-                    if (fl.IsComputed)
+                    if (field.IsComputed)
                     {
                         // objArray.Add(fl.TypeDefault);
                     }
                     else
                     {
-                        object o = row[fl.DataFieldName];
+                        object obj = row[field.DataFieldName];
                         try
                         {
-                            objArray.Add(CommonFunctions.ConvertObjType(o, fl.DataType, fl.Type));
+                            object convertedObj = null;
+
+                            //field is not nullable, and input is null, then throw exception
+                            if (!field.IsNullable && obj.IsDbNull())
+                            {
+                                throw new Exception($"Field [{field.DataFieldName}] value is null");
+                            }
+
+                            //if field is null and has default value, then set default value
+                            if(obj.IsDbNull() && !field.DefaultValue.IsDbNull())
+                            {
+                                obj = field.DefaultValue;
+                            }
+
+                            if (obj.IsDbNull())
+                            {
+                                convertedObj = null;
+                            }
+                            else
+                            {
+                                convertedObj = CommonFunctions.ConvertType(obj, field.DataType, field.Type);
+                            }
+
+                            objArray.Add(convertedObj);
                         }
                         catch (Exception ex)
                         {
                             WriteLog(ex.Message);
-                            throw new Exception($"Unbale to convert [{o}] to [{fl.DataType.ToUpper()}] at row #[{rowNum}] in [{dataObject.DataObjectName}]");
+                            throw new Exception($"Unbale to convert [{obj}] to [{field.DataType.ToUpper()}] at row #[{rowNum}] in [{dataObject.DataObjectName}]");
                         }
                     }
                 }
@@ -131,15 +150,29 @@ namespace TransactionUtility.TransactionTool
             }
         }
 
+        private void CreateNewDataTable()
+        {
+            newDataTable = new DataTable();
+
+            foreach (FieldDef field in dataObject.FieldDefCollection)
+            {
+                if (!field.IsComputed)
+                {
+                    newDataTable.Columns.Add(field.Alias, field.Type);
+                }
+            }
+        }
+
+
         private void EvaluatedComputedColumn()
         {
             if (!IsCalculatedFiledEvaluated)
             {
-                foreach (FieldDef fl in dataObject.FieldDefCollection)
+                foreach (FieldDef field in dataObject.FieldDefCollection)
                 {
-                    if (fl.IsComputed)
+                    if (field.IsComputed)
                     {
-                        newDataTable.Columns.Add(fl.Alias, fl.Type, fl.Formula);
+                        newDataTable.Columns.Add(field.Alias, field.Type, field.Formula);
                     }
                 }
                 IsCalculatedFiledEvaluated = true;
@@ -171,7 +204,7 @@ namespace TransactionUtility.TransactionTool
         {
             try
             {
-                
+
                 foreach (MeasureDef m in measureDefCollection)
                 {
                     WriteLog(" Source Measure: [" + m.SourceMeasure + "], DataObject: [" + m.SourceDataObject + "], Filter: [" + m.FilterClause + "]");
@@ -209,7 +242,7 @@ namespace TransactionUtility.TransactionTool
                     WriteLog($" Count: {counter}");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WriteLog($"Error Has Occured [{ex.Message}]");
                 writer.Write("Error Has Occured");

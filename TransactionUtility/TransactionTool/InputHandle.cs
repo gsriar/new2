@@ -8,20 +8,20 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-    public class InputHandle : ExcelBase, ILog, IDisposable
+    public class InputDataHelper : ExcelBase, ILog, IDisposable
     {
-        ConfigHandle configHandle = null;
-        public InputHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate,"Data")
+        ConfigHelper configHandle = null;
+        public InputDataHelper(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate,"Data")
         {
         }
 
-        internal Dictionary<string, DataTable> GetRawDataTables(List<string> sheets)
+        internal Dictionary<string, DataTable> GetBaseData(List<string> sheets)
         {
             Dictionary<string, DataTable> pairs = new Dictionary<string, DataTable>();
-            WriteLog($"...");
-            foreach (var obj in sheets)
+            WriteLog(Constants.BlankLine);
+            foreach (var sheet in sheets)
             {
-                pairs.Add(obj, this.GetDataTable(obj));
+                pairs.Add(sheet, this.GetDataTable(sheet));
             }
             return pairs;
         }

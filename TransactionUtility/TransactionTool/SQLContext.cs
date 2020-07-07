@@ -7,11 +7,11 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-	public class SQLContext : ILog, IDisposable
+    public class SQLContext : ILog, IDisposable
     {
-        private SQLiteConnection conn=null;
+        private SQLiteConnection conn = null;
 
-        private Action<string> logDelegate=null;
+        private Action<string> logDelegate = null;
 
         public SQLContext(Action<string> LogDelegate)
         {
@@ -25,7 +25,7 @@ namespace TransactionUtility.TransactionTool
 
         public void Dispose()
         {
-            if(conn!=null)
+            if (conn != null)
             {
                 conn.Close();
                 conn.Dispose();
@@ -38,9 +38,25 @@ namespace TransactionUtility.TransactionTool
             SQLiteCommand command = new SQLiteCommand(query, conn);
             return command.ExecuteNonQuery();
         }
-        public DataTable ExecuteQuery()
+        
+        public DataTable GetDataTable(string sql)
         {
-            throw new NotImplementedException();
+            try
+            {
+                DataTable dt = new DataTable();
+
+                SQLiteCommand mycommand = new SQLiteCommand(conn);
+                mycommand.CommandText = sql;
+                SQLiteDataReader reader = mycommand.ExecuteReader();
+                dt.Load(reader);
+                reader.Close();
+
+                return dt;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error executing select query :[{sql}].{Environment.NewLine}Error Message :[{ex.Message}]");
+            }
         }
 
         public void WriteLog(string logtext)
@@ -48,5 +64,5 @@ namespace TransactionUtility.TransactionTool
             if (this.logDelegate != null)
                 logDelegate(logtext);
         }
-	}
+    }
 }

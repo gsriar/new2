@@ -19,7 +19,7 @@ namespace TransactionUtility.TransactionTool
         public ExcelBase(string excelFilePath,Action<string> LogDelegate,string title="")
         {
             this.logDelegate = LogDelegate;
-            WriteLog($"...");
+            WriteLog(Constants.BlankLine);
             FileInfo fi = new FileInfo(excelFilePath);
 
             WriteLog($"[{title}] Excel: {fi.FullName}");
@@ -61,7 +61,7 @@ namespace TransactionUtility.TransactionTool
 
             var sheets = GetAllSheetNameList();
 
-            WriteLog($"Load Worksheet [{sheetName}] from [{excelFile.Name}]");
+            WriteLog($"Read Config Worksheet Name:[{sheetName}] from:[{excelFile.Name}]");
            
 
             if (!sheets.Contains(sheetName))

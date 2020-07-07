@@ -5,12 +5,13 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.Model
 {
-	public class FieldDef
-	{
+    public class FieldDef
+    {
         private string _iscalcuated;
         private string _dataType;
         private object _typeDefault;
         private Type _type;
+        private string _isNullable;
 
         public string DataObject { get; set; }
         public string DataFieldName { get; set; }
@@ -32,9 +33,9 @@ namespace TransactionUtility.Model
 
         public Type Type { get { return _type; } }
 
-        public object TypeDefault { get { return _typeDefault; } }
+        public object TypeDefaultValue { get { return _typeDefault; } }
 
-        public string IsNullable { get; set; }
+        public bool IsNullable { get; set; }
 
         public string SetIsComputed
         {
@@ -50,10 +51,7 @@ namespace TransactionUtility.Model
         }
         public string Formula { get; set; }
         public string Remarks { get; set; }
-
-		public DataFieldType DataFieldType()
-        {
-            return Model.DataFieldType.Numeric;
-        }
-	}
+        public object DefaultValue { get; internal set; }
+        public string Format { get; internal set; }
+    }
 }

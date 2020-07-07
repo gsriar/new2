@@ -12,13 +12,14 @@ namespace TransactionUtility
         public static string SheetDataObjectName = "DataObject";
         public static string SheetDataFiledDefinition = "DataFieldDefinition";
         public static string SheetMeasureDefinition = "MeasureDefinition";
+        internal static string BlankLine = "";
 
         public static string[] configSheets = {
             SheetDataObjectName,
             SheetDataFiledDefinition,
             SheetMeasureDefinition
         };
-
+       
 
         public static class DataTypes
         {
@@ -35,33 +36,15 @@ namespace TransactionUtility
             public static string Alias = "Alias";
             public static string ComputeQuery = "ComputeQuery";
             public static string IsComputed = "IsComputed";
-            /*IsComputed	ComputeFormula IsComputed	ComputeQuery*/
-
-            public static string Remarks = "Remarks";
-
-            public static string[] DataObjectFieldList = {
-                                                            DataObject,
-                                                            Alias,
-                                                            IsComputed,
-                                                            ComputeQuery,
-                                                            Remarks };
-
 
             public static string DataFieldName = "DataFieldName";
             public static string DataType = "DataType";
             public static string IsNullable = "IsNullable";
+            public static string DefaultValue = "DefaultValue";
+            public static string Format = "Format";
+
             public static string ComputeFormula = "ComputeFormula";
-
-            public static string[] DataFieldList = {
-            DataObject,
-            DataFieldName,
-            Alias,
-            DataType,
-            IsNullable,
-            IsComputed,
-            ComputeFormula,
-            Remarks};
-
+            public static string Remarks = "Remarks";
 
             public static string SourceMeasure = "SourceMeasure";
             public static string PersonOrOrg = "PersonOrOrg";
@@ -75,18 +58,41 @@ namespace TransactionUtility
             public static string FilterClause = "FilterClause";
             public static string Comments = "Comments";
 
+            public static string[] DataObjectFieldList = {
+                                                        DataObject,
+                                                        Alias,
+                                                        IsComputed,
+                                                        ComputeQuery,
+                                                        Remarks };
+
+
+            
+
+            public static string[] DataFieldList = {
+                                                    DataObject,
+                                                    DataFieldName,
+                                                    Alias,
+                                                    DataType,
+                                                    IsNullable,
+                                                    DefaultValue,
+                                                    Format,
+                                                    IsComputed,
+                                                    ComputeFormula,
+                                                    Remarks};
+
+
             public static string[] MeasureFieldList = {
-            SourceMeasure,
-            PersonOrOrg,
-            DataSourceIdentifier,
-            Periodicity,
-            SourceDataObject,
-            SourceMeasureMappingField,
-            SourceDateMappingField,
-            SourceEmployeeMappingField,
-            SourceOrgMappingField,
-            FilterClause,
-            Comments};
+                                                    SourceMeasure,
+                                                    PersonOrOrg,
+                                                    DataSourceIdentifier,
+                                                    Periodicity,
+                                                    SourceDataObject,
+                                                    SourceMeasureMappingField,
+                                                    SourceDateMappingField,
+                                                    SourceEmployeeMappingField,
+                                                    SourceOrgMappingField,
+                                                    FilterClause,
+                                                    Comments};
 
         }
     }

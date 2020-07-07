@@ -8,14 +8,14 @@ using TransactionUtility.Model;
 
 namespace TransactionUtility.TransactionTool
 {
-    public class ConfigHandle : ExcelBase, ILog, IDisposable
+    public class ConfigHelper : ExcelBase, ILog, IDisposable
     {
         List<DataObject> dataObjectCollection = new List<DataObject>();
         List<MeasureDef> measureDefCollection = new List<MeasureDef>();
         Dictionary<DataObject, DataObjectContext> dataContextDictionary = new Dictionary<DataObject, DataObjectContext>();
         private bool isBaseDataPersisted;
 
-        public ConfigHandle(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate, "Config") { }
+        public ConfigHelper(string excelFilePath, Action<string> LogDelegate) : base(excelFilePath, LogDelegate, "Config") { }
 
         public void Initilize()
         {
@@ -25,116 +25,107 @@ namespace TransactionUtility.TransactionTool
         public List<string> GetBaseDataObjectNames()
         {
             List<string> result = new List<string>();
-            dataObjectCollection.ForEach(d => { if (!d.IsComputed) result.Add(d.DataObjectName); });
+            dataObjectCollection.ForEach(dob => { if (!dob.IsComputed) result.Add(dob.DataObjectName); });
             return result;
         }
 
         public List<string> GetComputedDataObjectNames()
         {
             List<string> result = new List<string>();
-            dataObjectCollection.ForEach(d => { if (d.IsComputed) result.Add(d.DataObjectName); });
+            dataObjectCollection.ForEach(dob => { if (dob.IsComputed) result.Add(dob.DataObjectName); });
             return result;
         }
 
-        public void Validate()
+        public void ValidateBaseDataObjects()
         {
-            WriteLog("...");
-            WriteLog("Validating...");
+            WriteLog(Constants.BlankLine);
+            WriteLog("Validating base data...");
 
-            HashSet<string> dataObjectNames = new HashSet<string>();
-
-            foreach (var measure in measureDefCollection)
+            foreach (DataObject dob in dataObjectCollection.Where(d => !d.IsComputed))
             {
-                if (dataObjectNames.Contains(measure.SourceDataObject))
-                    continue;
-
-                var dto = this.GetDataObject(measure.SourceDataObject);
-                if (dto == null)
-                {
-                    throw new Exception($"DataObject (alias:[{measure.SourceDataObject}]) doesn't exist. Source Measure Name [{measure.SourceMeasure}]");
-                }
-                dataObjectNames.Add(measure.SourceDataObject);
-            }
-
-            foreach (DataObject key in dataContextDictionary.Keys)
-            {
-                var ctx = dataContextDictionary[key];
+                var ctx = dataContextDictionary[dob];
                 ctx.Validate();
             }
         }
 
-        internal void RunComputedDataObjects(SQLContext sqlContext)
+        public void ValidateComputedDataObjects()
         {
-            //insert data in sql
-            this.UpsertBaseDataObjects(sqlContext);
-            //set computed data tables
-            this.ExecuteComputedDataObjectQuery(sqlContext);
+            WriteLog(Constants.BlankLine);
+            WriteLog("Validating computed data ...");
+
+            foreach (DataObject dob in dataObjectCollection.Where(d => d.IsComputed))
+            {
+                var ctx = dataContextDictionary[dob];
+                ctx.Validate();
+            }
         }
 
-        private void UpsertBaseDataObjects(SQLContext sqlContext)
+        internal void EvaluateComputedDataObjects(SQLContext sqlContext)
         {
-            if (!isBaseDataPersisted)
+            //insert data in sql
+            this.PersistBaseDataObjects(sqlContext);
+            //set computed data tables
+            this.SetComputedDataObjectContext(sqlContext);
+        }
+
+        private void PersistBaseDataObjects(SQLContext sqlContext)
+        {
+            if (dataObjectCollection.Any(d => d.IsComputed) && !isBaseDataPersisted)
             {
-                foreach (DataObject dbo in this.dataContextDictionary.Keys.Where(d => !d.IsComputed))
+                foreach (DataObject dob in this.dataContextDictionary.Keys.Where(d => !d.IsComputed))
                 {
-                    var ctx = dataContextDictionary[dbo];
+                    WriteLog(Constants.BlankLine);
+                    var ctx = dataContextDictionary[dob];
                     if (!ctx.IsSQLTableCreated)
                     {
                         var sql1 = ctx.GetCreateTableQuery();
                         WriteLog(Environment.NewLine + sql1);
-                        sqlContext.ExecuteNonQuery( sql1);
-                        WriteLog("Table Created...");
-                        WriteLog("----");
+                        sqlContext.ExecuteNonQuery(sql1);
+                        WriteLog($"SQLLite Table[{dob.Alias}] Created");
                     }
-                   
+
                     if (!ctx.IsDataInserted)
                     {
                         var sql2 = ctx.GetInsertQuery();
                         var idx = sql2.NthIndexOf(Environment.NewLine, 3);
                         if (idx > -1)
-                            WriteLog(Environment.NewLine+ sql2.Substring(0, idx)+ "...................");
+                            WriteLog(Environment.NewLine + sql2.Substring(0, idx) + "...................");
                         else
                             WriteLog(sql2);
 
                         sqlContext.ExecuteNonQuery(sql2);
-                        WriteLog("Data Inserted...");
-                        WriteLog("----");
+                        WriteLog("Data Persited");
                     }
-                   
+
                     isBaseDataPersisted = true;
                 }
             }
         }
-        
 
-        internal void ExecuteComputedDataObjectQuery(SQLContext context)
+        internal void SetComputedDataObjectContext(SQLContext context)
         {
-            foreach (var dbo in this.dataObjectCollection.Where(d => d.IsComputed))
+            foreach (DataObject dob in this.dataObjectCollection.Where(d => d.IsComputed))
             {
+                var table = context.GetDataTable(dob.ComputeQuery);
+                SetDataContext(dob, table);
             }
         }
 
-        internal void ValidateComputedDataObjects()
-        {
-            throw new NotImplementedException();
-        }
-
-      
-
         public void WriteMeasureOutput(IWriter writer)
         {
-            WriteLog("...");
+            WriteLog(Constants.BlankLine);
             WriteLog("Writing Measure Output");
-            foreach (DataObject dto in dataContextDictionary.Keys)
+            foreach (DataObject dob in dataContextDictionary.Keys)
             {
-                var dataObjCtx = dataContextDictionary[dto];
+                var dataObjCtx = dataContextDictionary[dob];
                 dataObjCtx.WriteMeasureOutput(writer);
             }
         }
 
-        public void SetDataContext(Dictionary<string, DataTable> objDataDictionary)
+        public void SetBaseDataObjectContext(Dictionary<string, DataTable> objDataDictionary)
         {
-            WriteLog("...");
+            WriteLog(Constants.BlankLine);
+
             foreach (var key in objDataDictionary.Keys)
             {
                 WriteLog($"Set DataContext :[{key}]");
@@ -142,24 +133,31 @@ namespace TransactionUtility.TransactionTool
 
                 var dataObj = dataObjectCollection.FirstOrDefault(d => string.Equals(d.DataObjectName, key, StringComparison.OrdinalIgnoreCase));
 
-                var measureList = measureDefCollection.FindAll(m => m.SourceDataObject == dataObj.Alias).ToList();
-
-                DataObjectContext ctx = new DataObjectContext(dataObj, table, WriteLog, measureList);
-
-                dataContextDictionary[dataObj] = ctx;
+                SetDataContext(dataObj, table);
             }
+        }
+
+        private void SetDataContext(DataObject dob, DataTable table)
+        {
+            WriteLog(Constants.BlankLine);
+
+            var measureList = measureDefCollection.FindAll(m => m.SourceDataObject == dob.Alias).ToList();
+
+            DataObjectContext ctx = new DataObjectContext(dob, table, WriteLog, measureList);
+
+            dataContextDictionary[dob] = ctx;
+
         }
 
 
         private void LoadDefinition()
         {
-            WriteLog($"...");
             ReadWorkbookAndCleanup();
-            WriteLog($"...");
+            
             LoadDataObject(this.GetDataTable(Constants.SheetDataObjectName));
-            WriteLog($"...");
+           
             LoadDataFields(this.GetDataTable(Constants.SheetDataFiledDefinition), dataObjectCollection);
-            WriteLog($"...");
+           
             LoadMeasureDefinition(this.GetDataTable(Constants.SheetMeasureDefinition));
         }
 
@@ -183,10 +181,10 @@ namespace TransactionUtility.TransactionTool
         void LoadDataObject(DataTable sheetDataObject)
         {
             dataObjectCollection = new List<DataObject>();
-
+            WriteLog(Constants.BlankLine);
             foreach (DataRow row in sheetDataObject.Rows)
             {
-                WriteLog($" Loading DataObject Configuration [{row[Constants.ColumnFields.DataObject] as string}] alias [{row[Constants.ColumnFields.Alias] as string}]");
+                WriteLog($"Loading DataObject Definition Configuration [{row[Constants.ColumnFields.DataObject] as string}] alias [{row[Constants.ColumnFields.Alias] as string}]");
                 dataObjectCollection.Add(new DataObject(
                     row[Constants.ColumnFields.DataObject] as string,
                     row[Constants.ColumnFields.Alias] as string,
@@ -205,9 +203,8 @@ namespace TransactionUtility.TransactionTool
                 List<FieldDef> FieldDefCollection = new List<FieldDef>();
 
                 DataRow[] rows = sheetDataFields.Select(filter);
-
-                WriteLog($"...");
-                WriteLog($"Loading Data Fields of DataObject [{dataObject.DataObjectName}] alias [{dataObject.Alias}]");
+                WriteLog(Constants.BlankLine);
+                WriteLog($"Loading Data Fields Definition Configuration of [{dataObject.DataObjectName}] alias [{dataObject.Alias}]");
 
                 if (rows.Length == 0)
                     throw new Exception($"No Field defined for Data Object [{dataObject.Alias}]");
@@ -219,7 +216,14 @@ namespace TransactionUtility.TransactionTool
                     fld.DataFieldName = row[Constants.ColumnFields.DataFieldName] as string;
                     fld.Alias = row[Constants.ColumnFields.Alias] as string;
                     fld.DataType = row[Constants.ColumnFields.DataType] as string;
-                    fld.IsNullable = row[Constants.ColumnFields.IsNullable] as string;
+                    
+                    var isNullable = row[Constants.ColumnFields.IsNullable] as string;
+                    isNullable = string.IsNullOrEmpty(isNullable) ? "Y" : isNullable.Trim().ToUpper();
+                    fld.IsNullable = (isNullable == "Y");
+
+                    fld.DefaultValue = row[Constants.ColumnFields.DefaultValue] as string;
+                    fld.Format = row[Constants.ColumnFields.Format] as string;
+
                     fld.SetIsComputed = row[Constants.ColumnFields.IsComputed] as string;
                     fld.Formula = row[Constants.ColumnFields.ComputeFormula] as string;
                     fld.Remarks = row[Constants.ColumnFields.Remarks] as string;
@@ -238,7 +242,8 @@ namespace TransactionUtility.TransactionTool
         void LoadMeasureDefinition(DataTable sheetMeasures)
         {
             measureDefCollection = new List<MeasureDef>();
-
+            WriteLog(Constants.BlankLine);
+            WriteLog("Loading Measure Definition Configuration");
             foreach (DataRow row in sheetMeasures.Rows)
             {
                 MeasureDef m = new MeasureDef();
@@ -255,7 +260,7 @@ namespace TransactionUtility.TransactionTool
                 m.FilterClause = row[Constants.ColumnFields.FilterClause] as string;
                 m.Comments = row[Constants.ColumnFields.Comments] as string;
 
-                WriteLog($"Config Measure Definition  [{m.SourceDataObject}] | [{m.SourceMeasure}]");
+                WriteLog($" Measure Name: [{m.SourceMeasure}] - Source [{m.SourceDataObject}]");
 
                 measureDefCollection.Add(m);
             }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Text;
 using TransactionUtility.Model;
@@ -9,8 +10,8 @@ namespace TransactionUtility
 {
     public class CalculationEngine : IDisposable
     {
-        ConfigHandle configHandle;
-        InputHandle inputHandle;
+        ConfigHelper config;
+        InputDataHelper inputData;
         LogWriter logWriter;
         SQLContext sqlContext;
         InputParameter inputParameter;
@@ -36,23 +37,23 @@ namespace TransactionUtility
                 outputAttribute.add("log", logFileName);
                 sqlContext = new SQLContext(logWriter.Write);
 
-                configHandle = new ConfigHandle(inputParameter.ConfigExcelFilePath, logWriter.Write);
+                config = new ConfigHelper(inputParameter.ConfigExcelFilePath, logWriter.Write);
 
-                configHandle.Initilize();
+                config.Initilize();
 
-                inputHandle = new InputHandle(inputParameter.InputExcelFilePath, logWriter.Write);
+                inputData = new InputDataHelper(inputParameter.InputExcelFilePath, logWriter.Write);
 
-                var rawDataTables = inputHandle.GetRawDataTables(configHandle.GetBaseDataObjectNames());
+                Dictionary<string, DataTable> baseData = inputData.GetBaseData(config.GetBaseDataObjectNames());
 
-                configHandle.SetDataContext(rawDataTables);
+                config.SetBaseDataObjectContext(baseData);
 
-                configHandle.Validate();
+                config.ValidateBaseDataObjects();
 
                 //insert data in sql
-                configHandle.RunComputedDataObjects(sqlContext);
+                config.EvaluateComputedDataObjects(sqlContext);
 
                 //validate computed data types
-                //configHandle.ValidateComputedDataObjects();
+                config.ValidateComputedDataObjects();
 
                 var outputfile = Path.Combine(inputParameter.LogFolder, prefix + inputParameter.OutputFileName);
 
@@ -65,7 +66,7 @@ namespace TransactionUtility
                 outputTextWriter.Write(OutputMeasure.CsvHeader);
 
 
-                configHandle.WriteMeasureOutput(outputTextWriter);
+                config.WriteMeasureOutput(outputTextWriter);
             }
             catch (Exception ex)
             {
@@ -84,16 +85,16 @@ namespace TransactionUtility
 
         public void Dispose()
         {
-            if (configHandle != null)
+            if (config != null)
             {
-                configHandle.Dispose();
-                configHandle = null;
+                config.Dispose();
+                config = null;
             }
 
-            if (inputHandle != null)
+            if (inputData != null)
             {
-                inputHandle.Dispose();
-                inputHandle = null;
+                inputData.Dispose();
+                inputData = null;
             }
 
             if (sqlContext != null)

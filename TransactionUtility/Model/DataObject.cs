@@ -10,12 +10,12 @@ namespace TransactionUtility.Model
     {
         private string _isCalculated;
 
-        public DataObject(string dataObject, string alias, string isCalculated, string evaluationQuery)
+        public DataObject(string dataObject, string alias, string isCalculated, string computeQuery)
         {
             this.DataObjectName = dataObject;
             this.Alias = alias;
             this._isCalculated = isCalculated;
-            this.EvaluationQuery = evaluationQuery;
+            this.ComputeQuery = computeQuery;
         }
 
         public string DataObjectName { get; private set; }
@@ -24,7 +24,7 @@ namespace TransactionUtility.Model
 
         private string IsCalculated { get { return _isCalculated; }  set { _isCalculated = (value ?? "").ToUpper().Trim(); } }
 
-		public string EvaluationQuery { get; private set; }
+		public string ComputeQuery { get; private set; }
 
         public List<FieldDef> FieldDefCollection { get; set; }
         public bool IsComputed { get { return IsCalculated == "Y"; } }

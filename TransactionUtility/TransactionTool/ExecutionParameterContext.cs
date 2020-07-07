@@ -11,8 +11,8 @@ namespace TransactionUtility.TransactionTool
 		
 		public SQLContext SQLContext { get; set; }
 
-		public ConfigHandle ConfigHandle { get; set; }
+		public ConfigHelper ConfigHandle { get; set; }
 
-		public InputHandle InputHandle { get; set; }
+		public InputDataHelper InputHandle { get; set; }
 	}
 }
